@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" role="img" aria-label="FARYA">
+  <title>FARYA · فریا</title>
+  <defs>
+    <linearGradient id="tile" x1="6" y1="2" x2="58" y2="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#12301F"/>
+      <stop offset=".52" stop-color="#0C1B12"/>
+      <stop offset="1" stop-color="#0A1510"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="rgba(255,255,255,.42)"/>
+      <stop offset=".45" stop-color="rgba(255,255,255,.06)"/>
+      <stop offset="1" stop-color="rgba(127,191,90,.30)"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="26" y1="12" x2="52" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EAF7DC"/>
+      <stop offset=".55" stop-color="#C9E9A8"/>
+      <stop offset="1" stop-color="#8FD066"/>
+    </linearGradient>
+    <clipPath id="clip"><rect width="64" height="64" rx="18"/></clipPath>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="url(#tile)"/>
+  <rect x=".9" y=".9" width="62.2" height="62.2" rx="17.1" stroke="url(#rim)" stroke-width="1.8"/>
+  <path d="M0 20C14 4 40 1 64 8L64 0L0 0Z" fill="rgba(255,255,255,.10)" clip-path="url(#clip)"/>
+  <rect x="21.6" y="14" width="5.6" height="35" rx="2.8" fill="#F2FAE7"/>
+  <circle cx="24.4" cy="11.4" r="2.6" fill="#9BD96F"/>
+  <path d="M25.6 21.2C31.6 12.6 45.4 11.6 52.6 19.4C45.2 27.6 31.4 29 25.6 21.2Z" fill="url(#leaf)"/>
+  <path d="M25.6 36.2C30.4 29.6 41.6 29.2 46.6 35.6C41.4 42.4 30.6 42.8 25.6 36.2Z" fill="url(#leaf)" opacity=".9"/>
+  <path d="M27.4 21.4C34.6 19.6 44.4 19.2 51 19.9" stroke="rgba(12,30,18,.28)" stroke-width="1.1" stroke-linecap="round"/>
+  <path d="M27.4 36.4C33.4 35.4 40.6 35.4 45.4 35.9" stroke="rgba(12,30,18,.22)" stroke-width="1" stroke-linecap="round"/>
+</svg>
