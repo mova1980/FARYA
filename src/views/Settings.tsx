@@ -179,7 +179,7 @@ export default function Settings() {
               <p style={{ fontSize: 11.5, lineHeight: 1.9, color: 'var(--muted)', marginTop: 12 }}>
                 برای اتصالِ دائمیِ داده‌ها، فایل <code dir="ltr">.env.local</code> را در ریشهٔ پروژه
                 بسازید و دو مقدارِ <code dir="ltr">VITE_SUPABASE_URL</code> و{' '}
-                <code dir="ltr">VITE_SUPABASE_ANON_KEY</code> را وارد کنید؛ سپس اسکریپت‌های
+                <code dir="ltr">VITE_SUPABASE_PUBLISHABLE_KEY</code> را وارد کنید؛ سپس اسکریپت‌های
                 پوشهٔ <code dir="ltr">supabase/</code> را به ترتیب اجرا کنید.
               </p>
             )}

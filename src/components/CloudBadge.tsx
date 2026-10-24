@@ -36,7 +36,7 @@ export function CloudBadge({ compact = false }: { compact?: boolean }) {
     return (
       <span
         className="cloud-badge is-off"
-        title="برای اتصال به پایگاه‌داده، VITE_SUPABASE_URL و VITE_SUPABASE_ANON_KEY را تنظیم کنید"
+        title="برای اتصال به پایگاه‌داده، VITE_SUPABASE_URL و VITE_SUPABASE_PUBLISHABLE_KEY را تنظیم کنید"
       >
         <span className="cloud-dot" />
         {compact ? SHORT.off : LABEL.off}

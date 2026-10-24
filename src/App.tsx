@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useStore } from './lib/store';
 import { MediaProvider, useMedia } from './lib/media';
+import { useAuth } from './components/AuthGate';
+import { isSupabaseConfigured } from './lib/supabase';
 import { Logo } from './components/Logo';
 import { ChefAvatar } from './components/ChefAvatar';
 import { CloudBadge } from './components/CloudBadge';
@@ -42,6 +44,7 @@ const TITLES: Record<ViewKey, { t: string; s: string }> = {
 
 function Shell() {
   const { state, toasts, dismiss, engine } = useStore();
+  const { email, signOut } = useAuth();
   const { mobile, compact, tablet, touch } = useMedia();
   const [view, setView] = useState<ViewKey>('dashboard');
   const [booting, setBooting] = useState(true);
@@ -155,7 +158,7 @@ function Shell() {
       {/* ------------------------------------------------------- نوارِ کناری */}
       {!mobile && (
         <aside className="sidebar">
-          <div className="brand"><Logo tone="light" size={46} /></div>
+          <a className="brand" href="/" aria-label="بازگشت به سایت اصلی فریا"><Logo tone="light" size={46} /></a>
           {navList('side')}
           <div className="side-footer">
             <div className="chef-card">
@@ -178,7 +181,7 @@ function Shell() {
           <div className={`scrim${drawer ? ' on' : ''}`} onClick={() => setDrawer(false)} />
           <aside className={`nav-drawer${drawer ? ' on' : ''}`}>
             <div className="nav-drawer-head">
-              <Logo tone="dark" size={40} />
+              <a href="/" aria-label="بازگشت به سایت اصلی فریا"><Logo tone="dark" size={40} /></a>
               <button className="icon-btn" onClick={() => setDrawer(false)} aria-label="بستن"><IconX size={18} /></button>
             </div>
             {navList('drawer')}
@@ -221,6 +224,12 @@ function Shell() {
               <button className="chip red" style={{ cursor: 'pointer', border: '1px solid #f3ccd0' }}
                 onClick={() => go('pricing')}>
                 <IconAlert size={12} /> {faDigits(weakCount)} آیتم زیرِ هدف
+              </button>
+            )}
+            {isSupabaseConfigured && (
+              <button className="auth-logout" type="button" title={email ? `خروج از ${email}` : 'خروج از حساب'}
+                onClick={() => { if (window.confirm('از حسابِ فریا خارج می‌شوید؟')) void signOut(); }}>
+                <IconX size={15} /><span>خروج</span>
               </button>
             )}
             {mobile ? (

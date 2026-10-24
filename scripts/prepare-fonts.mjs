@@ -50,7 +50,8 @@ const WEIGHTS = [
 ];
 
 const FAMILIES = [
-  { test: /modam|مدام/i, name: 'MODAM', label: 'مدام (فارسی — فونت اصلی برنامه)', range: '100 900' },
+  { test: /modam|مدام/i, name: 'MODAM', label: 'مدام (فونت اصلی برنامه)', range: '100 900' },
+  { test: /modam|مدام/i, name: 'MODAM Condensed', label: 'مدام فشرده (زیرخانواده)', range: '100 900' },
   { test: /vazir/i, name: 'Vazirmatn', label: 'وزیرمتن (جایگزین فارسی)', range: '100 900' },
   { test: /bodoni/i, name: 'Bodoni Moda', label: 'Bodoni Moda (لاتینِ نمایشی)', range: '400 900' },
   { test: /outfit/i, name: 'Outfit', label: 'Outfit (لاتینِ رابط)', range: '100 900' },
@@ -74,7 +75,9 @@ if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
 const files = fs.readdirSync(dir).filter((f) => EXTS.includes(path.extname(f).toLowerCase()));
 const parsed = files.map((file) => {
-  const fam = FAMILIES.find((x) => x.test.test(file)) || null;
+  const fam = (/modam|مدام/i.test(file) && /condensed|فشرده/i.test(file))
+    ? { name: 'MODAM Condensed', label: 'مدام فشرده (زیرخانواده)', range: '100 900' }
+    : FAMILIES.find((x) => x.test.test(file)) || null;
   const w = detectWeight(file);
   return {
     file,

@@ -1,0 +1,160 @@
+.online-menu {
+  --on-night: #0c0a0b;
+  --on-cream: #f5f0e8;
+  --on-paper: #fbf9f5;
+  --on-ink: #211d1c;
+  --on-muted: #81766e;
+  --on-red: #8d2434;
+  --on-gold: #d9a976;
+  min-height: 100vh;
+  overflow: clip;
+  color: var(--on-ink);
+  background: var(--on-cream);
+  font-family: var(--font, 'MODAM', Tahoma, sans-serif);
+}
+.online-menu * { box-sizing: border-box; }
+.online-menu a { color: inherit; text-decoration: none; }
+.online-menu-header { position: absolute; z-index: 10; inset: 0 0 auto; height: 86px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-inline: clamp(18px,5vw,74px); color: #fff; background: rgba(12,10,11,.76); border-bottom: 1px solid rgba(255,255,255,.09); backdrop-filter: blur(16px); }
+.online-menu-brand { display: inline-flex; align-items: center; gap: 13px; }
+.online-menu-brand img { width: 68px; height: 68px; object-fit: cover; border-radius: 13px; box-shadow: 0 0 24px rgba(177,48,64,.23); }
+.online-menu-brand span { display: grid; gap: 5px; }
+.online-menu-brand b { direction: ltr; font: 700 17px/1 var(--font-latin,'MODAM',sans-serif); letter-spacing: .18em; }
+.online-menu-brand small { color: rgba(255,255,255,.58); font-size: 9px; }
+.online-menu-header nav { display: flex; align-items: center; gap: clamp(18px,3vw,40px); color: rgba(255,255,255,.76); font-size: 11px; }
+.online-menu-header nav > a:not(.online-menu-call) { transition: color .2s; }
+.online-menu-header nav > a:not(.online-menu-call):hover { color: #fff; }
+.online-menu-call { display: inline-flex; align-items: center; gap: 12px; min-height: 43px; padding: 0 17px; border: 1px solid rgba(255,255,255,.3); transition: background .25s,border-color .25s,transform .25s; }
+.online-menu-call:hover { background: var(--on-red); border-color: var(--on-red); transform: translateY(-2px); }
+.online-menu-hero { position: relative; min-height: min(740px,92svh); height: 690px; max-height: 820px; display: flex; align-items: center; overflow: hidden; color: #fff; background: var(--on-night); isolation: isolate; }
+.online-menu-hero-image { position: absolute; z-index: -3; inset: 0; background: url('/images/site-hero.webp') center 55%/cover; animation: online-hero-arrive 1.25s cubic-bezier(.16,1,.3,1) both, online-hero-breathe 18s ease-in-out 1.3s infinite alternate; }
+.online-menu-hero-shade { position: absolute; z-index: -2; inset: 0; background: linear-gradient(90deg,rgba(8,7,7,.04),rgba(8,7,7,.34) 38%,rgba(8,7,7,.84) 74%,rgba(8,7,7,.93)),linear-gradient(0deg,rgba(8,7,7,.60),transparent 42%); }
+.online-menu-hero-content { width: min(620px,84vw); margin-inline-start: clamp(24px,12vw,180px); padding-top: 78px; animation: online-copy-in .9s .12s cubic-bezier(.16,1,.3,1) both; }
+.online-kicker,.online-section-index { display: flex; align-items: center; gap: 10px; color: var(--on-gold); font-size: 10px; letter-spacing: .12em; }
+.online-kicker i { width: 7px; height: 7px; border-radius: 50%; background: #c34450; box-shadow: 0 0 12px #c34450; animation: online-pulse 2.2s ease-in-out infinite; }
+.online-menu-hero-content > p { margin: 35px 0 9px; color: rgba(255,255,255,.7); font-size: 11px; }
+.online-menu-hero h1 { margin: 0; font-size: clamp(58px,8vw,104px); line-height: 1.02; font-weight: 500; letter-spacing: -.065em; }
+.online-menu-hero h1 em,.online-section-heading h2 em,.online-menu-end h2 em { color: var(--on-gold); font-style: italic; font-weight: 500; }
+.online-menu-intro { display: block; max-width: 460px; margin-top: 18px; color: rgba(255,255,255,.65); font-size: 12px; line-height: 2; }
+.online-scroll-link { display: inline-flex; align-items: center; gap: 12px; margin-top: 24px; color: #f2d4b5 !important; font-size: 11px; }
+.online-scroll-link span { display: grid; place-items: center; width: 27px; height: 27px; border: 1px solid rgba(255,255,255,.36); border-radius: 50%; transition: transform .25s,background .25s; }
+.online-scroll-link:hover span { transform: translateY(3px); background: rgba(255,255,255,.1); }
+.online-hero-index { position: absolute; bottom: 35px; inset-inline-end: clamp(22px,5vw,74px); display: flex; align-items: center; gap: 11px; color: rgba(255,255,255,.56); font: 11px var(--font-latin,'MODAM',sans-serif); letter-spacing: .12em; }
+.online-hero-index i { width: 45px; height: 1px; background: rgba(255,255,255,.34); }
+.online-pizzas-section { padding: clamp(72px,9vw,126px) max(22px,calc((100vw - 1200px)/2)) 75px; background: var(--on-paper); }
+.online-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 28px; margin-bottom: 42px; }
+.online-section-index { color: var(--on-red); font-size: 9px; }
+.online-section-heading h2 { margin: 20px 0 0; font-size: clamp(40px,5vw,64px); line-height: 1.2; font-weight: 500; letter-spacing: -.05em; }
+.online-section-heading h2 em { color: var(--on-red); }
+.online-price-status { display: flex; align-items: center; gap: 10px; max-width: 380px; min-height: 48px; padding: 9px 12px; color: #74685f; background: #f3eee7; border: 1px solid rgba(55,40,35,.08); font-size: 10px; }
+.online-price-status p { margin: 0; line-height: 1.8; }
+.online-price-status button { flex: 0 0 auto; display: grid; place-items: center; width: 30px; height: 30px; margin-inline-start: 7px; border-radius: 50%; color: var(--on-red); background: rgba(141,36,52,.08); font: 20px/1 sans-serif; transition: transform .35s,background .2s; }
+.online-price-status button:hover { transform: rotate(90deg); background: rgba(141,36,52,.15); }
+.online-status-dot { flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: #c09a67; box-shadow: 0 0 0 4px rgba(192,154,103,.13); }
+.online-price-status.is-ready .online-status-dot { background: #6d8f63; box-shadow: 0 0 0 4px rgba(109,143,99,.13); }
+.online-price-status.is-unavailable .online-status-dot,.online-price-status.is-unconfigured .online-status-dot { background: #b34350; box-shadow: 0 0 0 4px rgba(179,67,80,.11); }
+.online-price-status.is-loading .online-price-status button { animation: online-spin 1.4s linear infinite; }
+.online-pizza-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 22px; }
+.online-pizza-card { min-width: 0; background: #fff; border: 1px solid rgba(49,39,35,.09); box-shadow: 0 6px 22px rgba(44,28,25,.035); animation: online-card-in .65s calc(var(--card-index)*70ms) cubic-bezier(.16,1,.3,1) both; transition: transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s,border-color .3s; }
+.online-pizza-card:hover { transform: translateY(-5px); border-color: rgba(141,36,52,.24); box-shadow: 0 20px 38px rgba(44,28,25,.11); }
+.online-pizza-photo { position: relative; aspect-ratio: 1.38; overflow: hidden; background: #261b1b; }
+.online-pizza-photo::after { content: ''; position: absolute; inset: 25% 0 0; background: linear-gradient(0deg,rgba(9,6,6,.6),transparent); }
+.online-pizza-photo img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .8s cubic-bezier(.16,1,.3,1),filter .5s; }
+.online-pizza-card:hover .online-pizza-photo img { transform: scale(1.055); filter: saturate(1.07); }
+.online-pizza-number,.online-pizza-meaning { position: absolute; z-index: 1; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,.8); }
+.online-pizza-number { top: 15px; left: 16px; font: 11px var(--font-latin,'MODAM',sans-serif); letter-spacing: .13em; }
+.online-pizza-meaning { bottom: 14px; right: 17px; font-size: 10px; }
+.online-pizza-content { padding: 21px 22px 19px; }
+.online-pizza-title { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.online-pizza-title > div { display: flex; align-items: baseline; gap: 11px; }
+.online-pizza-title h3 { margin: 0; direction: ltr; color: var(--on-ink); font: 500 clamp(22px,2.3vw,28px)/1.1 var(--font-display,'MODAM',sans-serif); }
+.online-pizza-title > div > span { color: var(--on-red); font-size: 12px; font-weight: 700; }
+.online-pizza-star { color: #bd9770; font-size: 16px; transition: transform .6s; }
+.online-pizza-card:hover .online-pizza-star { transform: rotate(75deg); }
+.online-pizza-note { min-height: 42px; margin: 12px 0 17px; color: #6f645d; font-size: 10px; line-height: 1.9; }
+.online-ingredients-label { display: flex; align-items: center; gap: 12px; color: #9b8a7c; font-size: 9px; }
+.online-ingredients-label i { flex: 1; height: 1px; background: rgba(50,39,36,.13); }
+.online-ingredients { min-height: 61px; margin: 10px 0 17px; color: #514944; font-size: 10px; line-height: 1.9; }
+.online-pizza-footer { display: flex; align-items: end; justify-content: space-between; gap: 12px; padding-top: 15px; border-top: 1px solid rgba(50,39,36,.12); }
+.online-current-price { display: grid; gap: 5px; }
+.online-current-price small { color: #9b8a7c; font-size: 9px; }
+.online-current-price strong { color: var(--on-red); font-size: 17px; line-height: 1.2; }
+.online-current-price em { font-size: 9px; font-style: normal; font-weight: 500; }
+.online-current-price .price-pending { color: #74685f; font-size: 11px; }
+.online-order-button { display: inline-flex; align-items: center; gap: 10px; min-height: 38px; padding: 0 12px; color: #fff !important; background: var(--on-red); font-size: 10px; transition: transform .2s,background .2s,gap .2s; }
+.online-order-button:hover { transform: translateY(-2px); gap: 15px; background: #a42c40; }
+.online-menu-disclaimer { margin: 24px 0 0; color: #958b82; font-size: 9px; line-height: 1.8; }
+.online-menu-end { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 360px; overflow: hidden; color: #fff; background: var(--on-red); text-align: center; isolation: isolate; }
+.online-menu-end::before { content: ''; position: absolute; z-index: -1; inset: 0; opacity: .24; background: radial-gradient(ellipse at 50% 120%,rgba(255,218,173,.45),transparent 56%),repeating-linear-gradient(135deg,transparent 0 58px,rgba(255,255,255,.04) 59px 60px); }
+.online-menu-end > img { width: 55px; height: 55px; margin-bottom: 13px; border-radius: 12px; object-fit: cover; box-shadow: 0 0 25px rgba(20,6,8,.22); }
+.online-menu-end > span { color: rgba(255,255,255,.74); font-size: 10px; }
+.online-menu-end h2 { margin: 9px 0 16px; font-size: clamp(37px,6vw,61px); font-weight: 500; }
+.online-menu-end h2 em { color: #f2d4b5; }
+.online-menu-end > a:not(.online-back-home) { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; color: var(--on-red); background: #f8efe5; font-size: 11px; transition: transform .2s,background .2s; }
+.online-menu-end > a:not(.online-back-home):hover { transform: translateY(-2px); background: #fff; }
+.online-back-home { margin-top: 16px; color: rgba(255,255,255,.65) !important; font-size: 9px; transition: color .2s; }
+.online-back-home:hover { color: #fff !important; }
+@keyframes online-hero-arrive { from { transform: scale(1.12); filter: saturate(.72) brightness(.72); } to { transform: scale(1.04); filter: saturate(1.02) brightness(1); } }
+@keyframes online-hero-breathe { from { transform: scale(1.04) translate3d(0,0,0); } to { transform: scale(1.11) translate3d(-1%,-.3%,0); } }
+@keyframes online-copy-in { from { opacity: 0; transform: translateY(19px); } to { opacity: 1; transform: none; } }
+@keyframes online-card-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+@keyframes online-spin { to { transform: rotate(360deg); } }
+@keyframes online-pulse { 50% { box-shadow: 0 0 18px 5px rgba(195,68,80,.55); } }
+@media (max-width: 950px) {
+  .online-menu-header { height: 78px; padding-inline: 22px; }
+  .online-menu-brand img { width: 60px; height: 60px; }
+  .online-pizza-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+  .online-menu-hero-content { margin-inline-start: 8vw; }
+}
+@media (max-width: 680px) {
+  .online-menu-header { height: 72px; padding-inline: 14px; }
+  .online-menu-brand { gap: 8px; }
+  .online-menu-brand img { width: 52px; height: 52px; border-radius: 10px; }
+  .online-menu-brand b { font-size: 14px; }
+  .online-menu-brand small { font-size: 8px; }
+  .online-menu-header nav { gap: 13px; font-size: 9px; }
+  .online-menu-header nav > a:not(.online-menu-call) { display: none; }
+  .online-menu-call { min-height: 38px; padding-inline: 10px; gap: 7px; }
+  .online-menu-hero { min-height: 670px; height: 88svh; max-height: 820px; align-items: end; padding-bottom: 82px; }
+  .online-menu-hero-image { background-position: 35% center; }
+  .online-menu-hero-shade { background: linear-gradient(0deg,rgba(8,7,7,.96) 2%,rgba(8,7,7,.82) 44%,rgba(8,7,7,.22) 100%),linear-gradient(90deg,rgba(8,7,7,.08),rgba(8,7,7,.25)); }
+  .online-menu-hero-content { width: calc(100% - 42px); margin-inline: 21px; padding-top: 100px; }
+  .online-menu-hero-content > p { margin-top: 24px; }
+  .online-menu-hero h1 { font-size: clamp(54px,14vw,75px); }
+  .online-menu-intro { font-size: 11px; }
+  .online-hero-index { bottom: 24px; inset-inline-end: 20px; }
+  .online-pizzas-section { padding: 69px 18px 51px; }
+  .online-section-heading { display: grid; gap: 21px; margin-bottom: 26px; }
+  .online-section-heading h2 { font-size: 42px; }
+  .online-price-status { max-width: none; min-height: 43px; font-size: 9px; }
+  .online-pizza-grid { grid-template-columns: 1fr; gap: 14px; }
+  .online-pizza-card { display: grid; grid-template-columns: 39% 1fr; align-items: stretch; }
+  .online-pizza-photo { min-height: 202px; aspect-ratio: auto; }
+  .online-pizza-photo img { position: absolute; inset: 0; }
+  .online-pizza-number { top: 10px; left: 9px; font-size: 9px; }
+  .online-pizza-meaning { right: 9px; bottom: 9px; font-size: 8px; }
+  .online-pizza-content { align-self: center; padding: 13px 12px; }
+  .online-pizza-title > div { display: grid; gap: 4px; }
+  .online-pizza-title h3 { font-size: 21px; }
+  .online-pizza-title > div > span { font-size: 10px; }
+  .online-pizza-star { font-size: 12px; }
+  .online-pizza-note { min-height: auto; margin: 7px 0 10px; font-size: 9px; line-height: 1.7; }
+  .online-ingredients-label { font-size: 8px; }
+  .online-ingredients { min-height: auto; margin: 7px 0 10px; font-size: 8.5px; line-height: 1.65; }
+  .online-pizza-footer { align-items: center; gap: 7px; padding-top: 10px; }
+  .online-current-price strong { font-size: 12px; }
+  .online-current-price .price-pending { font-size: 9px; }
+  .online-current-price small { font-size: 8px; }
+  .online-order-button { min-height: 32px; padding-inline: 9px; font-size: 9px; }
+  .online-menu-disclaimer { font-size: 8px; }
+  .online-menu-end { min-height: 310px; padding: 34px 18px; }
+}
+@media (max-width: 380px) {
+  .online-menu-header nav { gap: 8px; }
+  .online-menu-call { font-size: 8px; }
+  .online-pizza-card { grid-template-columns: 36% 1fr; }
+  .online-pizza-content { padding-inline: 10px; }
+  .online-pizza-title h3 { font-size: 19px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .online-menu *, .online-menu *::before, .online-menu *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

@@ -48,16 +48,13 @@
   --sidebar-w: 262px;
 
   /* ================================ تایپوگرافی ================================
-     --font        : فونت اصلیِ کل برنامه (مدام؛ اگر فایل‌هایش را در public/fonts
-                     نریخته باشید، خودکار به وزیرمتن برمی‌گردد)
-     --font-latin  : لاتینِ رابط  (Outfit — هندسی و هماهنگ با مدام)
-     --font-display: لاتینِ نمایشی (Bodoni Moda — هنری و ادیتوریال، برای وردمارک)
-     وزن‌های مدام: 100 ExtraLight · 300 Light · 400 Regular · 500 Medium
-                   600 SemiBold · 700 Bold · 800 ExtraBold · 900 Black
+     کل متن‌های فارسی و لاتین، متن‌های نمایشی و رابطِ اپلیکیشن از مدام استفاده می‌کنند.
+     وزن‌ها: 100 ExtraLight · 300 Light · 400 Regular · 500 Medium
+             600 SemiBold · 700 Bold · 800 ExtraBold · 900 Black
      ========================================================================== */
-  --font: 'MODAM', 'Vazirmatn', 'Tahoma', system-ui, sans-serif;
-  --font-latin: 'Outfit', 'MODAM', 'Vazirmatn', system-ui, sans-serif;
-  --font-display: 'Bodoni Moda', 'Outfit', 'MODAM', Georgia, serif;
+  --font: 'MODAM', 'Tahoma', system-ui, sans-serif;
+  --font-latin: 'MODAM', 'Tahoma', system-ui, sans-serif;
+  --font-display: 'MODAM', 'Tahoma', system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -73,6 +70,19 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow: hidden;
+}
+
+/* Public landing page is a normal scrolling document; the cost console stays viewport-locked. */
+body.public-restaurant {
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+body.public-restaurant #root {
+  height: auto;
+  min-height: 100dvh;
+  overflow: visible;
 }
 
 ::selection { background: rgba(127, 191, 90, .32); }
@@ -1052,13 +1062,14 @@ tr:hover .row-actions { opacity: 1; }
 .logo-mark-wrap { position: relative; display: inline-flex; flex: 0 0 auto; }
 .logo-mark-wrap::before {
   content: ''; position: absolute; inset: -18%; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle at 50% 55%, rgba(127, 191, 90, .42), rgba(127, 191, 90, 0) 68%);
+  background: radial-gradient(circle at 50% 55%, rgba(174, 48, 64, .32), rgba(217, 169, 118, 0) 70%);
   filter: blur(6px); opacity: .55; z-index: 0;
   animation: logoAura 5.5s ease-in-out infinite;
 }
 .logo-mark { position: relative; z-index: 1; overflow: visible; filter: drop-shadow(0 4px 10px rgba(12, 20, 14, .18)); }
+.logo-mark-image { display: block; border-radius: 14px; object-fit: cover; }
 .logo-anim .logo-mark { transition: transform .5s var(--ease), filter .5s var(--ease); }
-.logo-anim:hover .logo-mark { transform: translateY(-2px) scale(1.045) rotate(-1.5deg); }
+.logo-anim:hover .logo-mark { transform: translateY(-2px) scale(1.035); }
 .logo-anim:hover .logo-mark-wrap::before { opacity: .85; }
 
 /* تابشِ نوری */
@@ -1501,4 +1512,68 @@ tr:hover .row-actions { opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   .cloud-dot { animation: none !important; }
+}
+
+/* ============================================================================
+   ورود امنِ فریا — صفحهٔ احراز هویتِ سرآشپز
+   ========================================================================== */
+.auth-screen {
+  position: relative; isolation: isolate; min-height: 100%; overflow: hidden;
+  display: grid; place-items: center; padding: 28px 18px 64px;
+  background:
+    radial-gradient(ellipse at 15% 15%, rgba(127,191,90,.12), transparent 34%),
+    radial-gradient(ellipse at 85% 82%, rgba(196,118,58,.10), transparent 32%),
+    var(--linen); color: var(--txt);
+}
+.auth-orb { position: absolute; z-index: -1; border-radius: 50%; filter: blur(2px); pointer-events: none; }
+.auth-orb-a { width: 330px; height: 330px; top: -180px; inset-inline-start: -90px; background: radial-gradient(circle, rgba(127,191,90,.20), transparent 68%); animation: auth-float 11s ease-in-out infinite alternate; }
+.auth-orb-b { width: 430px; height: 430px; bottom: -270px; inset-inline-end: -130px; background: radial-gradient(circle, rgba(196,118,58,.14), transparent 70%); animation: auth-float 13s ease-in-out infinite alternate-reverse; }
+@keyframes auth-float { to { transform: translate3d(20px,-12px,0) scale(1.06); } }
+.auth-card {
+  width: min(100%, 430px); padding: clamp(24px, 5vw, 42px); border: 1px solid rgba(231,227,216,.9);
+  border-radius: 26px; background: rgba(255,255,255,.91); box-shadow: 0 24px 80px rgba(12,17,13,.10), 0 2px 8px rgba(12,17,13,.04);
+  backdrop-filter: blur(18px); animation: auth-rise .55s var(--ease) both;
+}
+@keyframes auth-rise { from { opacity: 0; transform: translateY(16px) scale(.985); } to { opacity: 1; transform: none; } }
+.auth-brand { display: flex; align-items: center; gap: 13px; margin-bottom: 35px; }
+.auth-brand-copy { display: grid; gap: 2px; }
+.auth-brand-copy strong { direction: ltr; font: 700 23px/1 var(--font-display); letter-spacing: .13em; color: var(--ink); }
+.auth-brand-copy span { font-size: 11px; color: var(--muted); }
+.auth-eyebrow { display: flex; align-items: center; gap: 8px; color: var(--moss); font-size: 11px; font-weight: 700; }
+.auth-secure-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--leaf); box-shadow: 0 0 0 4px var(--leaf-100); }
+.auth-card h1 { margin: 13px 0 7px; font-size: clamp(25px, 6vw, 32px); line-height: 1.4; letter-spacing: -.035em; }
+.auth-lead { margin: 0 0 25px; font-size: 13px; line-height: 1.9; color: var(--txt-2); }
+.auth-form { display: grid; gap: 9px; }
+.auth-label { margin-top: 5px; font-size: 12px; font-weight: 700; color: var(--txt-2); }
+.auth-input { width: 100%; min-height: 48px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper-2); padding: 0 14px; color: var(--txt); font: 500 14px var(--font-latin); outline: none; transition: border-color .2s, box-shadow .2s, background .2s; }
+.auth-input:focus { border-color: var(--moss); background: #fff; box-shadow: 0 0 0 4px rgba(47,107,76,.10); }
+.auth-submit { min-height: 49px; margin-top: 10px; border: 0; border-radius: 13px; color: #fff; background: linear-gradient(135deg, #347a53, #24563c); font: 700 14px var(--font); cursor: pointer; box-shadow: 0 8px 18px rgba(47,107,76,.20); transition: transform .2s var(--ease), box-shadow .2s, filter .2s; }
+.auth-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(47,107,76,.26); filter: saturate(1.1); }
+.auth-submit:disabled { opacity: .55; cursor: not-allowed; }
+.auth-reset { display: block; margin: 15px auto 0; padding: 6px; border: 0; color: var(--moss); background: none; font: 600 12px var(--font); cursor: pointer; }
+.auth-reset:hover:not(:disabled) { color: var(--moss-600); text-decoration: underline; }
+.auth-reset:disabled { opacity: .6; cursor: wait; }
+.auth-message { margin: 3px 0; padding: 10px 12px; border-radius: 10px; font-size: 12px; line-height: 1.8; }
+.auth-message.is-error { color: #8e2632; background: var(--berry-100); border: 1px solid #f2ccd0; }
+.auth-message.is-notice { color: var(--moss-600); background: var(--moss-100); border: 1px solid #d1e5d7; }
+.auth-foot { display: flex; align-items: center; gap: 8px; margin-top: 25px; padding-top: 16px; border-top: 1px solid var(--line-2); color: var(--muted); font-size: 10.5px; line-height: 1.8; }
+.auth-lock { display: grid; place-items: center; flex: 0 0 21px; height: 21px; border-radius: 7px; background: var(--moss-100); color: var(--moss); font-size: 16px; }
+.auth-bottom { position: absolute; bottom: 20px; inset-inline: 0; text-align: center; color: var(--muted); font: 600 10px var(--font); letter-spacing: .03em; }
+.auth-bottom span { color: var(--leaf); padding-inline: 5px; }
+.auth-check { display: flex; align-items: center; gap: 14px; padding: 18px 24px; border-radius: 16px; background: rgba(255,255,255,.8); color: var(--txt-2); box-shadow: var(--sh-2); font-size: 13px; }
+.auth-spinner { width: 16px; height: 16px; border: 2px solid rgba(47,107,76,.18); border-top-color: var(--moss); border-radius: 50%; animation: auth-spin .7s linear infinite; }
+.auth-spinner.light { border-color: rgba(255,255,255,.28); border-top-color: #fff; }
+@keyframes auth-spin { to { transform: rotate(360deg); } }
+.auth-logout { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.78); color: var(--txt-2); font: 600 11px var(--font); cursor: pointer; transition: .2s var(--ease); }
+.auth-logout:hover { border-color: #efc3c7; color: var(--berry); background: var(--berry-100); transform: translateY(-1px); }
+.auth-logout:hover .ico { animation: icon-x .45s var(--ease); }
+@keyframes icon-x { 50% { transform: rotate(90deg) scale(1.1); } }
+@media (max-width: 480px) {
+  .auth-screen { padding-inline: 14px; }
+  .auth-card { border-radius: 21px; }
+  .auth-logout { width: 34px; justify-content: center; padding: 0; }
+  .auth-logout span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-orb, .auth-card, .auth-spinner { animation: none !important; }
 }
