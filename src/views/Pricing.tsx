@@ -17,7 +17,7 @@ export default function Pricing() {
   const [onlyWeak, setOnlyWeak] = useState(false);
 
   const rows = useMemo(() => {
-    let list = state.items.filter((i) => i.category !== 'نیمه‌ساخته' && i.active);
+    let list = state.items.filter((i) => i.category === 'پیتزا' && i.active);
     if (q) list = list.filter((i) => i.name.includes(q) || i.code.includes(q));
     if (cat) list = list.filter((i) => i.category === cat);
     let mapped = list.map((i) => ({ item: i, c: engine.byItem[i.id] })).filter((x) => x.c);
@@ -40,19 +40,20 @@ export default function Pricing() {
 
   const applyAll = () => {
     let n = 0;
-    state.items.filter((i) => i.category !== 'نیمه‌ساخته' && i.active).forEach((i) => {
+    const incomplete = state.items.filter((i) => i.category === 'پیتزا' && i.active && !engine.byItem[i.id]?.costComplete).length;
+    state.items.filter((i) => i.category === 'پیتزا' && i.active).forEach((i) => {
       const c = engine.byItem[i.id];
-      if (c && c.suggested && c.suggested !== i.price) {
+      if (c?.costComplete && c.suggested && c.suggested !== i.price) {
         dispatch({ type: 'item/update', id: i.id, patch: { oldPrice: i.price ?? null, price: c.suggested } });
         n += 1;
       }
     });
-    toast(`قیمتِ ${faDigits(n)} آیتم بر اساسِ حاشیهٔ هدف به‌روزرسانی شد`, 'ok');
+    toast(`قیمتِ ${faDigits(n)} آیتم به‌روزرسانی شد؛ ${faDigits(incomplete)} آیتمِ دارای هزینهٔ ناقص رد شد.`, incomplete ? 'err' : 'ok');
   };
 
   const roundAll = () => {
     let n = 0;
-    state.items.filter((i) => i.category !== 'نیمه‌ساخته' && i.active && i.price).forEach((i) => {
+    state.items.filter((i) => i.category === 'پیتزا' && i.active && i.price).forEach((i) => {
       const r = roundTo(i.price as number, 1000);
       if (r !== i.price) {
         dispatch({ type: 'item/update', id: i.id, patch: { oldPrice: i.price ?? null, price: r } });
@@ -64,7 +65,7 @@ export default function Pricing() {
 
   const bump = (percent: number) => {
     let n = 0;
-    state.items.filter((i) => i.category !== 'نیمه‌ساخته' && i.active && i.price).forEach((i) => {
+    state.items.filter((i) => i.category === 'پیتزا' && i.active && i.price).forEach((i) => {
       const v = roundTo((i.price as number) * (1 + percent / 100), 500);
       dispatch({ type: 'item/update', id: i.id, patch: { oldPrice: i.price ?? null, price: v } });
       n += 1;
@@ -113,11 +114,15 @@ export default function Pricing() {
           <Button variant="primary" onClick={applyAll}><IconBolt size={15} /> اِعمال قیمت پیشنهادی</Button>
         </div>
 
+        {rows.some(({ c }) => !c.costComplete) && <div role="status" style={{ margin: '0 18px 14px', padding: '12px 14px', borderRadius: 12, background: 'rgba(188,99,54,.12)', color: 'var(--clay)', fontSize: 13 }}>
+          <b>بعضی بهای تمام‌شده‌ها ناقص‌اند.</b> برای این آیتم‌ها قیمت پیشنهادی، سود و حاشیه عمداً محاسبه نمی‌شود و «اِعمال قیمت پیشنهادی» آن‌ها را رد می‌کند. بررسی کنید: {Array.from(new Set(rows.filter(({ c }) => !c.costComplete).flatMap(({ c }) => c.missingCostInputs))).slice(0, 8).join('، ')}
+        </div>}
+
         {tab === 'table' ? (
           rows.length === 0 ? <Empty icon="🧮" title="آیتمی برای نمایش نیست" /> : mobile ? (
             <div className="row-cards" style={{ padding: '0 14px 14px' }}>
               {rows.map(({ item, c }) => {
-                const weak = (c.margin ?? 1) < state.settings.targetMargin;
+                const weak = c.costComplete && (c.margin ?? 1) < state.settings.targetMargin;
                 const heavy = (c.foodCost ?? 0) > 0.4;
                 return (
                   <div className="row-card" key={item.id} style={{ cursor: 'default' }}>
@@ -129,7 +134,9 @@ export default function Pricing() {
                         <div className="rc-sub">{item.category}</div>
                       </div>
                       <div className="rc-side">
-                        {weak
+                        {!c.costComplete
+                          ? <span className="chip clay">هزینه ناقص</span>
+                          : weak
                           ? <span className="chip red">زیرِ هدف</span>
                           : heavy
                             ? <span className="chip clay">مواد بالا</span>
@@ -143,7 +150,7 @@ export default function Pricing() {
                       </div>
                       <div className="rc-m">
                         <div className="l">پیشنهاد</div>
-                        <div className="v num" style={{ color: 'var(--clay)' }}>{num(Math.round(c.suggested))}</div>
+                        <div className="v num" style={{ color: 'var(--clay)' }}>{c.costComplete ? num(Math.round(c.suggested)) : 'ناقص'}</div>
                       </div>
                       <div className="rc-m">
                         <div className="l">سود</div>
@@ -187,7 +194,7 @@ export default function Pricing() {
                 </thead>
                 <tbody>
                   {rows.map(({ item, c }) => {
-                    const weak = (c.margin ?? 1) < state.settings.targetMargin;
+                    const weak = c.costComplete && (c.margin ?? 1) < state.settings.targetMargin;
                     const heavy = (c.foodCost ?? 0) > 0.4;
                     return (
                       <tr key={item.id}>
@@ -210,7 +217,7 @@ export default function Pricing() {
                             style={{ width: 96, textAlign: 'left' }} />
                         </td>
                         <td className="n" style={{ color: 'var(--clay)', fontWeight: 700 }}>
-                          {num(Math.round(c.suggested))}
+                          {c.costComplete ? num(Math.round(c.suggested)) : 'ناقص'}
                         </td>
                         <td className="n" style={{ color: (c.profit ?? 0) < 0 ? 'var(--berry)' : 'var(--txt)' }}>
                           {c.profit == null ? '—' : num(Math.round(c.profit))}
@@ -222,7 +229,9 @@ export default function Pricing() {
                           {pct(c.foodCost, 1)}
                         </td>
                         <td>
-                          {weak
+                          {!c.costComplete
+                            ? <span className="chip clay" title={c.missingCostInputs.join('، ')}>هزینه ناقص</span>
+                            : weak
                             ? <span className="chip red">زیرِ هدف</span>
                             : heavy
                               ? <span className="chip clay">بهای مواد بالا</span>
@@ -239,7 +248,7 @@ export default function Pricing() {
           <div className="card-pad" style={{ paddingTop: 0 }}>
             <div className="menu-grid">
               {rows.map(({ item, c }) => {
-                const weak = (c.margin ?? 1) < state.settings.targetMargin;
+                const weak = c.costComplete && (c.margin ?? 1) < state.settings.targetMargin;
                 const ings = item.recipe
                   .map((r) => state.ingredients.find((i) => i.id === r.ingredientId)?.name)
                   .filter(Boolean).slice(0, 4).join('، ');
@@ -270,8 +279,8 @@ export default function Pricing() {
                         </span>
                       </div>
                       <div className="foot">
-                        <span className={`chip ${weak ? 'red' : 'green'}`}>
-                          {weak ? 'نیازمند بازنگری' : 'سودآور'}
+                        <span className={`chip ${!c.costComplete ? 'clay' : weak ? 'red' : 'green'}`}>
+                          {!c.costComplete ? 'هزینه ناقص' : weak ? 'نیازمند بازنگری' : 'سودآور'}
                         </span>
                         <span className="chip">بهای مواد {pct(c.foodCost, 0)}</span>
                       </div>

@@ -1337,7 +1337,8 @@ begin
 
   -- معادلِ میلادیِ تاریخِ ایجاد
   update public.ingredients
-     set created_at = coalesce(public.jalali_to_gregorian(created_jdate), current_date);
+     set created_at = coalesce(public.jalali_to_gregorian(created_jdate), current_date)
+   where id is not null;
 
   -- تاریخچهٔ قیمت‌ها (همان ترتیبِ آرایهٔ برنامه → ستونِ seq ترتیب را حفظ می‌کند)
   insert into public.price_points (ingredient_id, price, jdate, note)

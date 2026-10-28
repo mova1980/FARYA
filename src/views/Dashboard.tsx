@@ -13,7 +13,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (v: string) => v
   const sum = useMemo(() => summarize(state, engine), [state, engine]);
   const today = todayJalaliStr();
 
-  const menuItems = state.items.filter((i) => i.category !== 'نیمه‌ساخته' && i.active && i.price);
+  const menuItems = state.items.filter((i) => i.category === 'پیتزا' && i.active && i.price && engine.byItem[i.id]?.costComplete);
 
   const costRows = useMemo(() => [...menuItems]
     .map((i) => ({ item: i, c: engine.byItem[i.id] }))
@@ -93,6 +93,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (v: string) => v
           </div>
         </div>
       </section>
+
+      {sum.incompleteCount > 0 && <button type="button" onClick={() => onNavigate('pricing')} style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', textAlign: 'right', padding: '12px 15px', border: '1px solid rgba(190,132,59,.22)', borderRadius: 12, background: 'rgba(190,132,59,.1)', color: 'var(--clay)', cursor: 'pointer' }}>
+        <IconAlert size={17} /><span><b>{faDigits(sum.incompleteCount)} آیتم با بهای ناقص</b> — قیمت‌های تأییدنشده از میانگین سود و قیمت پیشنهادی کنار گذاشته شده‌اند؛ برای تکمیل به قیمت‌گذاری بروید.</span>
+      </button>}
 
       {/* ----------------------------------------------------------------- kpi */}
       <div className="grid g4" style={{ marginBottom: 16 }}>

@@ -30,6 +30,7 @@ export default function Ingredients() {
 
   const rows = useMemo(() => {
     const list = state.ingredients.filter((i) => {
+      if (i.subRecipeId) return false; // سس‌ها و نیمه‌ساخته‌ها در بخشِ جدا نمایش داده می‌شوند
       const matchQ = !q || i.name.includes(q) || (i.note || '').includes(q);
       const matchU = !unitFilter || i.unit === unitFilter;
       return matchQ && matchU;
@@ -141,7 +142,7 @@ export default function Ingredients() {
           <div>
             <h3>مواد اولیه و قیمت‌های روز</h3>
             <div className="sub">
-              {faDigits(state.ingredients.length)} ماده — هر قیمت با تاریخ شمسی نگهداری می‌شود
+              {faDigits(state.ingredients.filter((i) => !i.subRecipeId).length)} مادهٔ خام — سس‌ها و نیمه‌ساخته‌ها جداگانه مدیریت می‌شوند
             </div>
           </div>
           <div className="spacer" />

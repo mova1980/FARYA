@@ -28,7 +28,7 @@ export default function Overheads() {
   const coef = state.settings.overheadExtraCoef || 0;
   const setCoef = (v: number) => dispatch({ type: 'settings', patch: { overheadExtraCoef: v } });
 
-  const menuItems = state.items.filter((i) => i.category !== 'نیمه‌ساخته' && i.active);
+  const menuItems = state.items.filter((i) => i.category === 'پیتزا' && i.active);
 
   const impact = useMemo(() => {
     const cur = menuItems.reduce((a, i) => a + (engine.byItem[i.id]?.overhead || 0), 0);

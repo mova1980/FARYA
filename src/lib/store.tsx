@@ -21,7 +21,7 @@ const INITIAL: AppState = {
 };
 
 export const UNITS = ['کیلو', 'گرم', 'لیتر', 'میلی‌لیتر', 'عدد', 'پرس', 'بسته', 'شاخه', 'قاشق'];
-export const CATEGORIES = ['پیش‌غذا', 'سالاد', 'پیتزا', 'پوچوآ', 'پاستا', 'برگر', 'غذای اصلی', 'دسر', 'نوشیدنی', 'نیمه‌ساخته'];
+export const CATEGORIES = ['پیش‌غذا', 'سالاد', 'پیتزا', 'پوچوآ', 'پاستا', 'برگر', 'غذای اصلی', 'دسر', 'نوشیدنی', 'سس', 'نیمه‌ساخته'];
 
 export const OVERHEAD_PRESETS: Array<{ name: string; kind: Overhead['kind']; note: string }> = [
   { name: 'اجاره ماهانه', kind: 'monthly', note: 'بر اساس تعداد پرس ماهانه تسهیم می‌شود' },

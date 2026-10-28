@@ -806,12 +806,12 @@ begin
 
   -- سربارها (ابتدا، چون آیتم‌ها به آن‌ها ارجاع می‌دهند)
   -- ترتیبِ حذف رعایتِ کلیدهای خارجی است
-  delete from public.item_overheads;
-  delete from public.recipe_steps;
-  delete from public.price_points;
-  delete from public.ingredients;      -- به menu_items ارجاع دارد → پیش از آن حذف می‌شود
-  delete from public.menu_items;
-  delete from public.overheads;
+  delete from public.item_overheads where true;
+  delete from public.recipe_steps where true;
+  delete from public.price_points where true;
+  delete from public.ingredients where true;      -- به menu_items ارجاع دارد → پیش از آن حذف می‌شود
+  delete from public.menu_items where true;
+  delete from public.overheads where true;
 
   v_k := 0;
   for v_ovh in select * from jsonb_array_elements(coalesce(p_state->'overheads', '[]'::jsonb))

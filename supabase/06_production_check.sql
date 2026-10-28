@@ -6,7 +6,7 @@
 
 -- 1) Dataset baseline. Expected after reset: 8 menu rows (7 pizzas + dough),
 --    99 ingredients, 58 price points, 73 recipe steps, 9 overheads,
---    56 item-overhead links, and 1 app-state history row.
+--    56 item-overhead links, and at least 1 app-state history row (currently 2 after RPC smoke test).
 select 'menu_items' as table_name, count(*) as rows from public.menu_items
 union all select 'ingredients', count(*) from public.ingredients
 union all select 'price_points', count(*) from public.price_points

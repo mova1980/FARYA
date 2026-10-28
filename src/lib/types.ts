@@ -1,5 +1,13 @@
 export type OverheadKind = 'per-portion' | 'monthly' | 'percent';
 
+export const PREPARATION_CATEGORIES = ['سس', 'نیمه‌ساخته'] as const;
+export function isPreparationCategory(category: string): boolean {
+  return (PREPARATION_CATEGORIES as readonly string[]).includes(category);
+}
+export function isSellableCategory(category: string): boolean {
+  return category === 'پیتزا';
+}
+
 export interface PricePoint {
   id: string;
   price: number;
@@ -88,6 +96,9 @@ export interface Computed {
   foodCost: number | null;    // ۰ تا ۱
   suggested: number;
   extraCoef: number;
+  /** Missing purchase-price or recipe inputs; non-empty means total/suggestion are provisional. */
+  missingCostInputs: string[];
+  costComplete: boolean;
 }
 
 export interface AppState {

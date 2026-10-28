@@ -5,7 +5,7 @@ import { Button, Empty, Field, Modal, MoneyInput, SearchBox, Switch } from '../c
 import { faDigits, num, pct, uid } from '../lib/format';
 import { IconPlus, IconTrash, IconEdit, IconCheck, IconCopy, IconLayers, IconBolt, IconChevron } from '../components/Icons';
 import { useMedia } from '../lib/media';
-import type { MenuItem, RecipeStep } from '../lib/types';
+import { isPreparationCategory, type MenuItem, type RecipeStep } from '../lib/types';
 
 const IMAGES = ['pizza.jpg', 'burger.jpg', 'pasta.jpg', 'salad.jpg', 'bread.jpg', 'dessert.jpg', 'beef.jpg', ''];
 
@@ -46,13 +46,14 @@ export default function Recipes() {
   });
 
   const items = useMemo(() => state.items.filter((i) => {
+    if (i.category !== 'پیتزا') return false;
     const mq = !q || i.name.includes(q) || i.code.includes(q) ||
       i.recipe.some((r) => state.ingredients.find((x) => x.id === r.ingredientId)?.name.includes(q));
     const mc = !cat || i.category === cat;
     return mq && mc;
   }), [state.items, state.ingredients, q, cat]);
 
-  const sel = state.items.find((i) => i.id === selId) || items[0] || state.items[0];
+  const sel = items.find((i) => i.id === selId) || items[0];
   const selIdSafe = sel?.id;
   const comp = sel ? engine.byItem[selIdSafe] : null;
 
@@ -60,7 +61,7 @@ export default function Recipes() {
   const ingUnit = (id: string) => state.ingredients.find((i) => i.id === id)?.unit || '';
   const ingPrice = (id: string) => engine.priceOf[id] ?? manualPrice(state.ingredients.find((i) => i.id === id));
 
-  const openCreate = () => { setEditing(false); setForm(blankItem()); setFormOpen(true); };
+  const openCreate = () => { toast('منوی فروش عمداً فقط هفت پیتزای اصلی را دارد؛ برای سس/نیمه‌ساخته از بخش مستقل آن‌ها استفاده کنید.', 'warn'); };
   const openEdit = () => { if (!sel) return; setEditing(true); setForm({ ...sel }); setFormOpen(true); };
 
   const saveForm = () => {
@@ -111,7 +112,7 @@ export default function Recipes() {
     });
   };
 
-  const isSemi = sel?.category === 'نیمه‌ساخته';
+  const isSemi = !!sel && isPreparationCategory(sel.category);
 
   return (
     <div className="view">
@@ -121,10 +122,10 @@ export default function Recipes() {
           <div className="card-head">
             <div>
               <h3>آیتم‌ها و دستور پخت</h3>
-              <div className="sub">{faDigits(state.items.length)} آیتم</div>
+              <div className="sub">{faDigits(state.items.filter((item) => item.category === 'پیتزا' && item.active).length)} پیتزای فروش</div>
             </div>
             <div className="spacer" />
-            <button className="btn sm primary" onClick={openCreate}><IconPlus size={14} /> جدید</button>
+            <button className="btn sm primary" data-quick="item" onClick={openCreate}><IconPlus size={14} /> محصول جدید</button>
           </div>
           <div style={{ padding: '0 14px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
             <SearchBox value={q} onChange={setQ} placeholder="جستجو در نام یا مواد…" />
@@ -507,7 +508,7 @@ export default function Recipes() {
           <Field label="قیمت فروش">
             <MoneyInput value={form.price} onChange={(v) => setForm({ ...form, price: v })} />
           </Field>
-          {form.category === 'نیمه‌ساخته' && (
+          {isPreparationCategory(form.category) && (
             <>
               <Field label="بازدهی">
                 <input className="input mono" type="number" step="0.001" value={form.yieldQty ?? 1}
@@ -559,4 +560,4 @@ export default function Recipes() {
   );
 }
 
-function isSemiCat(i: MenuItem) { return i.category === 'نیمه‌ساخته'; }
+function isSemiCat(i: MenuItem) { return isPreparationCategory(i.category); }

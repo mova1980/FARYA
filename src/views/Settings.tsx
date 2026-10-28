@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useStore } from '../lib/store';
+import { isPreparationCategory } from '../lib/types';
 import { Button, Field, Modal, MoneyInput } from '../components/ui';
 import { faDigits, num } from '../lib/format';
 import { jalaliLong, todayJalaliStr } from '../lib/jalali';
@@ -116,8 +117,8 @@ export default function Settings() {
             <div className="divider" style={{ margin: '14px 0' }} />
             <div className="grid g3" style={{ gap: 10 }}>
               {[
-                { l: 'آیتم‌های منو', v: state.items.filter((i) => i.category !== 'نیمه‌ساخته').length },
-                { l: 'دستورهای نیمه‌ساخته', v: state.items.filter((i) => i.category === 'نیمه‌ساخته').length },
+                { l: 'پیتزاهای فروش', v: state.items.filter((i) => i.category === 'پیتزا' && i.active).length },
+                { l: 'دستورهای نیمه‌ساخته', v: state.items.filter((i) => isPreparationCategory(i.category)).length },
                 { l: 'مواد اولیه', v: state.ingredients.length },
                 { l: 'آیتم‌های سربار', v: state.overheads.length },
                 { l: 'ردیف‌های دستور پخت', v: state.items.reduce((a, i) => a + i.recipe.length, 0) },

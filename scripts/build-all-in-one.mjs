@@ -5,7 +5,7 @@
  *
  * خروجی شاملِ bootstrap و feedِ عمومیِ منو است. فقط روی پروژهٔ خالی اجرا شود.
  * روی پایگاهِ دادهٔ تولیدی اجرا نکنید: bootstrap داده‌ها را seed/بازسازی می‌کند.
- * برای پروژهٔ موجود، فقط migration افزایشیِ 07_public_menu.sql را اعمال کنید.
+ * برای پروژهٔ موجود، 07 قبلاً اعمال شده؛ 10_operations_inventory_sales.sql یک migration مستقلِ staging-only است و وارد bootstrap نمی‌شود.
  *
  * خروجی باید SQLِ خالص باشد؛ هیچ دستورِ psql (مثلِ \\set یا \\i) در آن نیست.
  */
@@ -33,8 +33,8 @@ const header = `-- =============================================================
 --
 --  IMPORTANT: Never run this full bootstrap on the existing production project.
 --  The app's save_state() rebuilds relational tables and the seed is legacy data.
---  Existing production project: use only the tracked additive migration
---  add_public_menu_feed (source: supabase/07_public_menu.sql), already applied.
+--  Existing production project: 07_public_menu.sql is already applied.
+--  10_operations_inventory_sales.sql is a separate staging-only migration; do not apply to production without explicit approval.
 --
 --  This is plain SQL for the Supabase SQL Editor; it contains no psql commands.
 -- ============================================================================
