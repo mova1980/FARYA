@@ -32,3 +32,72 @@
   .sf-receipt,.sf-receipt *{visibility:visible!important}.sf-receipt{display:block!important;margin:0 auto!important;break-inside:avoid;page-break-inside:avoid}
   .sf-receipt.receipt-58{width:52mm!important}.sf-receipt.receipt-80{width:72mm!important}
 }
+
+/* Accessible light palette for the cash-register console on Farya's linen UI. */
+.sf-view {
+  --text: #17221a;
+  --muted: #58645a;
+  --card: #ffffff;
+  --line: #d8ddd5;
+  color: var(--text);
+}
+.sf-topbar { background: linear-gradient(115deg,rgba(47,107,76,.09),rgba(210,156,93,.08)),#fff; }
+.sf-title-icon { color: #24563c; background: #e6f0e9; border-color: #c8dfce; }
+.sf-title p,.sf-panel-head p,.sf-range-tools label { color: #566258; }
+.sf-error { color: #8b2d35; background: #fbe9ea; border-color: #eac2c7; }
+.sf-tabs button { background: #fff; color: #526055; }
+.sf-tabs button:hover { color: #17221a; border-color: #8baa92; }
+.sf-tabs button.on { color: #fff; background: linear-gradient(140deg,#315f40,#244b32); border-color: #315f40; }
+.sf-panel-head>svg { color: #356b48; }
+.sf-badge { color: #285a3b; background: #eaf3ec; border-color: #cbded0; }
+.sf-search { color: #526055; background: #f7f8f5; border-color: #d8ddd5; }
+.sf-search input { color: #17221a; }
+.sf-search input::placeholder { color: #626e64; opacity: 1; }
+.sf-product-tile { color: #17221a; background: #fff; border-color: #d8ddd5; }
+.sf-product-tile:hover:not(:disabled) { border-color: #76a17f; background: #f3f8f3; }
+.sf-product-tile:disabled { opacity: .76; }
+.sf-product-tile>span:not(.sf-product-cat) { color: #566258; }
+.sf-product-tile small,.sf-catalog-card small { color: #58645a; }
+.sf-product-cat { color: #285a3b; background: #e7f1e9; }
+.sf-cart-empty,.sf-empty-session,.sf-chart-empty { color: #58645a; border-color: #cbd4ca; }
+.sf-cart-line { background: #f8f8f5; border-color: #d8ddd5; }
+.sf-cart-name small,.sf-cart-line label span { color: #59665b; }
+.sf-payment-box { background: #f7f8f5; border-color: #d8ddd5; }
+.sf-payment-title span { color: #58645a; }
+.sf-provisional-note { color: #76511f; }
+.sf-totals { background: #f0f2ed; border: 1px solid #d8ddd5; }
+.sf-totals>div span { color: #58645a; }
+.sf-totals .sf-grand-total span { color: #17221a; }
+.sf-totals .sf-grand-total strong { color: #24563c; }
+.sf-totals .sf-due,.sf-totals .sf-due b { color: #87491e; }
+.sf-check,.sf-paper-choice { color: #58645a; }
+.sf-session-state { color: #285a3b; background: #eaf3ec; border: 1px solid #cbded0; }
+.sf-live-dot { background: #3e874e; }
+.sf-cash-kpis>div { background: #f4f6f2; border-color: #dce2d9; }
+.sf-cash-kpis span { color: #58645a; }
+.sf-divider { background: #d8ddd5; }
+.sf-hint { color: #285a3b; background: #edf5ee; border-color: #cbded0; }
+.sf-hint.warning { color: #76511f; background: #fff4df; border-color: #ead5a9; }
+.sf-muted,.sf-catalog-section h4 small { color: #58645a; }
+.sf-diff { color: #963d2c !important; }
+.sf-catalog-card { background: #fff; border-color: #d8ddd5; }
+.sf-catalog-card.inactive { opacity: .78; }
+.sf-kpi span,.sf-kpi small,.sf-legend { color: #58645a; }
+.sf-axis-label { fill: #59665b; }
+.sf-gridline { stroke: #e1e6df; }
+.sf-axis-line { stroke: #9ca99e; }
+.sf-tax-bar { fill: #b67823; }
+.sf-legend i.tax { background: #a66b1e; }
+.sf-profit-dot { fill: #a66b1e; stroke: #593d1a; }
+.sf-invoice-no { color: #285a3b; }
+.sf-status { color: #76511f; background: #fff4df; border-color: #ead5a9; }
+.sf-status.paid { color: #285a3b; background: #eaf3ec; border-color: #cbded0; }
+.sf-status.partial { color: #285a78; background: #eaf3f8; border-color: #c8deea; }
+.sf-status.legacy { color: #4d5850; background: #eef0ed; border-color: #d7ddd7; }
+.sf-status.due { color: #873c2d; background: #fbece7; border-color: #ecd0c6; }
+.sf-guide-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 5px; color: #24563c; font-size: 11px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.sf-guide-link:hover { color: #183d29; }
+.sf-guide-link:focus-visible { outline: 2px solid #2f6b4c; outline-offset: 3px; border-radius: 4px; }
+@media(max-width:760px) { .sf-guide-link { margin-top: 3px; } }
+.sf-view .btn:disabled { opacity: .76; color: #536057; background: #edf0eb; border-color: #d8ddd5; box-shadow: none; }
+.sf-view .btn.primary:disabled { color: #fff; background: #557d60; border-color: #557d60; }

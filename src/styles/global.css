@@ -1577,3 +1577,8 @@ tr:hover .row-actions { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   .auth-orb, .auth-card, .auth-spinner { animation: none !important; }
 }
+
+/* Keep the chef-console navigation labels readable against its dark sidebar. */
+.nav-group-title { color: rgba(232,239,233,.62); }
+.nav-item { color: rgba(232,239,233,.82); }
+.chef-sub { color: rgba(232,239,233,.68); }

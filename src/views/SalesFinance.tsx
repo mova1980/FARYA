@@ -83,7 +83,7 @@ function ProfitChart({ data }: { data: Daily[] }) {
   const y = (v: number) => top + (max-v)/(max-min || 1)*plotH;
   const pts = data.map((d,i) => `${left+(data.length===1?plotW/2:i*plotW/(data.length-1))},${y(value(d.net_profit))}`).join(' ');
   return <div className="sf-chart-scroll"><svg className="sf-chart sf-profit-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="نمودار سود خالص روزانه">
-    <defs><linearGradient id="sfProfitGradient" x1="0" x2="1"><stop offset="0" stopColor="#db9f62"/><stop offset="1" stopColor="#f1cc8c"/></linearGradient></defs>
+    <defs><linearGradient id="sfProfitGradient" x1="0" x2="1"><stop offset="0" stopColor="#915813"/><stop offset="1" stopColor="#c1832b"/></linearGradient></defs>
     <line x1={left} x2={width-right} y1={y(0)} y2={y(0)} className="sf-axis-line"/>
     <polyline points={pts} fill="none" stroke="url(#sfProfitGradient)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="sf-profit-line"/>
     {data.map((d,i) => { const x=left+(data.length===1?plotW/2:i*plotW/(data.length-1)); return <g key={d.day}><title>{dateFa(d.day)} · سود خالص {money(d.net_profit)}</title><circle cx={x} cy={y(value(d.net_profit))} r="4" className="sf-profit-dot"/><text x={x} y={height-9} textAnchor="middle" className="sf-axis-label">{dateFa(d.day).slice(-5)}</text></g>; })}
@@ -257,7 +257,7 @@ export default function SalesFinance() {
 
   return <div className="view sf-view" dir="rtl">
     <section className="card card-pad sf-topbar pos-no-print">
-      <div className="sf-title"><div className="sf-title-icon"><IconWallet size={22}/></div><div><h2>فروش، فاکتور و صندوق</h2><p>کاتالوگِ محصول نهایی، فیش‌پرینت، دریافت چندروشی و گزارش مالیِ زنده.</p></div></div>
+      <div className="sf-title"><div className="sf-title-icon"><IconWallet size={22}/></div><div><h2>فروش، فاکتور و صندوق</h2><p>کاتالوگِ محصول نهایی، فیش‌پرینت، دریافت چندروشی و گزارش مالیِ زنده.</p><a className="sf-guide-link" href="/guides/farya-pos-cash-guide.html" target="_blank" rel="noreferrer">راهنمای سادهٔ صندوق <span aria-hidden="true">↗</span></a></div></div>
       <div className="sf-range-tools"><label>از <input className="input" type="date" value={from} onChange={(e)=>{setFrom(e.target.value);void refresh(e.target.value,to);}}/></label><label>تا <input className="input" type="date" value={to} onChange={(e)=>{setTo(e.target.value);void refresh(from,e.target.value);}}/></label><Button onClick={()=>setRange('today')}>امروز</Button><Button onClick={()=>setRange('week')}>۷ روز</Button><Button onClick={()=>setRange('month')}>ماه جاری</Button><Button onClick={()=>void refresh()} disabled={loading}><IconRefresh size={15}/>{loading?'در حال دریافت…':'به‌روزرسانی'}</Button></div>
     </section>
 
