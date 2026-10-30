@@ -586,6 +586,10 @@ begin
   update public.settings s set
     restaurant          = coalesce(p_patch->>'restaurant', s.restaurant),
     restaurant_fa       = coalesce(p_patch->>'restaurantFa', s.restaurant_fa),
+    restaurant_phone    = coalesce(p_patch->>'restaurantPhone', s.restaurant_phone),
+    restaurant_address  = coalesce(p_patch->>'restaurantAddress', s.restaurant_address),
+    taxpayer_id         = coalesce(p_patch->>'taxpayerId', s.taxpayer_id),
+    economic_code       = coalesce(p_patch->>'economicCode', s.economic_code),
     chef                = coalesce(p_patch->>'chef', s.chef),
     currency            = coalesce(p_patch->>'currency', s.currency),
     target_margin       = coalesce((p_patch->>'targetMargin')::numeric, s.target_margin),
@@ -712,6 +716,10 @@ returns jsonb language sql stable as $$
       select jsonb_build_object(          -- نام‌ها باید camelCase باشند (قراردادِ برنامه)
                'restaurant',          s.restaurant,
                'restaurantFa',        s.restaurant_fa,
+               'restaurantPhone',     s.restaurant_phone,
+               'restaurantAddress',   s.restaurant_address,
+               'taxpayerId',          s.taxpayer_id,
+               'economicCode',        s.economic_code,
                'chef',                s.chef,
                'currency',            s.currency,
                'overheadExtraCoef',   s.overhead_extra_coef,

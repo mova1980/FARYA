@@ -195,6 +195,10 @@ create table if not exists public.settings (
   id                  smallint     primary key default 1 check (id = 1),
   restaurant          text         not null default 'FARYA',
   restaurant_fa       text         not null default 'فریا',
+  restaurant_phone    text         not null default '',
+  restaurant_address  text         not null default '',
+  taxpayer_id         text         not null default '',
+  economic_code       text         not null default '',
   chef                text         not null default 'سرآشپز فرناز',
   currency            text         not null default 'تومان',
   target_margin       numeric      not null default 0.35

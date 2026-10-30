@@ -12,7 +12,7 @@ import { faDigits } from './lib/format';
 import { jalaliLong, todayJalaliStr } from './lib/jalali';
 import {
   IconDashboard, IconLeaf, IconBook, IconLayers, IconTag, IconSliders,
-  IconPlus, IconBolt, IconCheck, IconAlert, IconMenu, IconX, IconSalad,
+  IconPlus, IconBolt, IconCheck, IconAlert, IconMenu, IconX, IconSalad, IconWallet,
 } from './components/Icons';
 import Dashboard from './views/Dashboard';
 import Ingredients from './views/Ingredients';
@@ -22,15 +22,17 @@ import Pricing from './views/Pricing';
 import Settings from './views/Settings';
 import Preparations from './views/Preparations';
 import Operations from './views/Operations';
+import SalesFinance from './views/SalesFinance';
 
-type ViewKey = 'dashboard' | 'ingredients' | 'recipes' | 'preparations' | 'operations' | 'overheads' | 'pricing' | 'settings';
+type ViewKey = 'dashboard' | 'ingredients' | 'recipes' | 'preparations' | 'operations' | 'pos' | 'overheads' | 'pricing' | 'settings';
 
 const NAV: Array<{ key: ViewKey; label: string; short: string; sub: string; ico: any; group: string }> = [
   { key: 'dashboard', label: 'نمای کلی', short: 'خانه', sub: 'شاخص‌ها و تحلیل', ico: IconDashboard, group: 'نگاه کلان' },
   { key: 'ingredients', label: 'مواد اولیه', short: 'مواد', sub: 'قیمت‌ها و تاریخچه', ico: IconLeaf, group: 'پایهٔ داده' },
   { key: 'recipes', label: 'آیتم‌ها و دستور پخت', short: 'آیتم‌ها', sub: 'رسپی و محاسبه', ico: IconBook, group: 'پایهٔ داده' },
   { key: 'preparations', label: 'سس‌ها و نیمه‌ساخته‌ها', short: 'سس/ن‌ساخته', sub: 'رسپی و بازده', ico: IconSalad, group: 'پایهٔ داده' },
-  { key: 'operations', label: 'انبار و سود و زیان', short: 'انبار', sub: 'موجودی و فروش', ico: IconBolt, group: 'عملیات' },
+  { key: 'operations', label: 'انبار و تولید', short: 'انبار', sub: 'موجودی و تولید', ico: IconBolt, group: 'عملیات' },
+  { key: 'pos', label: 'فروش، فاکتور و صندوق', short: 'فروش', sub: 'فاکتور و گزارش', ico: IconWallet, group: 'عملیات' },
   { key: 'overheads', label: 'هزینه‌های سربار', short: 'سربار', sub: 'ضریب و تسهیم', ico: IconLayers, group: 'محاسبه' },
   { key: 'pricing', label: 'قیمت‌گذاری منو', short: 'قیمت', sub: 'حاشیهٔ سود', ico: IconTag, group: 'محاسبه' },
   { key: 'settings', label: 'تنظیمات', short: 'تنظیمات', sub: 'پارامترها و داده', ico: IconSliders, group: 'سیستم' },
@@ -43,7 +45,8 @@ const TITLES: Record<ViewKey, { t: string; s: string }> = {
   ingredients: { t: 'مواد اولیه', s: 'مدیریت قیمت‌ها با تاریخِ شمسی و تاریخچهٔ کامل' },
   recipes: { t: 'آیتم‌ها و دستور پخت', s: 'تعریف مواد مصرفی، ضریب، بازدهی و سربار هر آیتم' },
   preparations: { t: 'سس‌ها و نیمه‌ساخته‌ها', s: 'فرمول خام، بازده، مصرف هر پیتزا و بهای واحدِ تولید' },
-  operations: { t: 'انبار و سود و زیان', s: 'گردش انبارِ FEFO، فروش روزانه، انقضا و سود واقعی' },
+  operations: { t: 'انبار و تولید', s: 'گردش انبارِ FEFO، تولید، انقضا و ارزش موجودی' },
+  pos: { t: 'فروش، فاکتور و صندوق', s: 'ثبت کالاهای نهایی، فیش‌پرینت، دریافت و تطبیق پایان نوبت' },
   overheads: { t: 'هزینه‌های سربار', s: 'تعریف آیتم‌های سربار، ضریبِ اضافی و نحوهٔ تسهیم' },
   pricing: { t: 'قیمت‌گذاری منو', s: 'محاسبهٔ بهای تمام‌شده، قیمت پیشنهادی و حاشیهٔ سود' },
   settings: { t: 'تنظیمات', s: 'پارامترهای محاسبه، پشتیبان و مدیریت داده‌ها' },
@@ -110,7 +113,7 @@ function Shell() {
   /* بستنِ منو با تغییرِ نما */
   const go = (v: ViewKey) => { setView(v); setDrawer(false); setQuick(false); contentRef.current?.scrollTo({ top: 0 }); };
 
-  const counts: Record<string, number> = {
+  const counts: Record<string, number | undefined> = {
     ingredients: state.ingredients.length,
     recipes: state.items.filter((i) => i.category === 'پیتزا' && i.active).length,
     preparations: state.items.filter((i) => isPreparationCategory(i.category)).length,
@@ -281,6 +284,7 @@ function Shell() {
               {view === 'recipes' && <Recipes key="v-rec" />}
               {view === 'preparations' && <Preparations key="v-prep" />}
               {view === 'operations' && <Operations key="v-ops" />}
+              {view === 'pos' && <SalesFinance key="v-pos" />}
               {view === 'overheads' && <Overheads key="v-ovh" />}
               {view === 'pricing' && <Pricing key="v-pri" />}
               {view === 'settings' && <Settings key="v-set" />}
@@ -292,7 +296,7 @@ function Shell() {
       {/* ------------------------------------------------------- نوارِ پایین */}
       {mobile && (
         <nav className="bottom-nav">
-          {NAV.filter((n) => n.key !== 'preparations' && n.key !== 'operations').map((n) => {
+          {NAV.filter((n) => ['dashboard', 'ingredients', 'recipes', 'pos', 'pricing', 'settings'].includes(n.key)).map((n) => {
             const Ico = n.ico;
             return (
               <button key={n.key} className={`bottom-nav-item${view === n.key ? ' on' : ''}`}

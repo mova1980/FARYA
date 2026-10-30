@@ -7,9 +7,9 @@ import { faDigits, num, pct } from '../lib/format';
 import { IconRefresh, IconPlus, IconCheck, IconAlert, IconLayers, IconLeaf, IconBolt } from '../components/Icons';
 import '../styles/operations.css';
 
-type Tab = 'stock' | 'production' | 'sales' | 'pnl';
+type Tab = 'stock' | 'production' | 'pnl';
 type InventoryItem = {
-  id: string; ingredient_id: string | null; name: string; item_kind: 'raw' | 'prepared'; base_unit: string;
+  id: string; ingredient_id: string | null; name: string; item_kind: 'raw' | 'prepared' | 'finished'; base_unit: string;
   on_hand_qty: number | string; stock_value: number | string; weighted_avg_unit_cost: number | string;
   reorder_point: number | string; expiry_warning_days: number; track_expiry: boolean; active: boolean;
 };
@@ -33,7 +33,6 @@ type SaleLineSummary = { sale_id: string; sold_at: string; item_name: string; qt
 type ExpenseSummary = { id: string; occurred_at: string; category: string; amount: number | string; note: string };
 type InventoryTransaction = { id: string; item_id: string; item_name: string; txn_type: string; qty_delta: number | string; base_unit: string; value_delta: number | string; occurred_at: string; note: string };
 type OpsSnapshot = { business_day: string; items: InventoryItem[]; lots: InventoryLot[]; alerts: InventoryAlert[]; transactions: InventoryTransaction[]; pnl: Pnl; today_sales: SaleLineSummary[]; today_expenses: ExpenseSummary[]; targets: { monthly_unit_goal: number | string; daily_revenue_goal: number | string | null; daily_profit_goal: number | string | null } | null };
-type SaleDraftLine = { menu_item_id: string; qty: string; unit_price: string; discount_amount: string };
 
 const localToday = () => {
   const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tehran', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
@@ -73,14 +72,10 @@ export default function Operations() {
   const [adjust, setAdjust] = useState({ itemId: '', delta: '', totalValue: '', expires: '', reason: '', note: '' });
   const [waste, setWaste] = useState({ itemId: '', qty: '', reason: '', note: '' });
   const [production, setProduction] = useState({ itemId: '', batches: '1', output: '', expires: '', lot: '', note: '' });
-  const [saleLines, setSaleLines] = useState<SaleDraftLine[]>([{ menu_item_id: '', qty: '1', unit_price: '', discount_amount: '0' }]);
-  const [saleNote, setSaleNote] = useState('');
-  const [expense, setExpense] = useState({ category: '', amount: '', note: '' });
   const [targets, setTargets] = useState({ monthlyUnits: '1000', dailyRevenue: '', dailyProfit: '' });
   const [settingsItem, setSettingsItem] = useState<InventoryItem | null>(null);
   const [settingsDraft, setSettingsDraft] = useState({ reorder: '0', days: '7', trackExpiry: true });
 
-  const pizzas = useMemo(() => state.items.filter((item) => item.category === 'پیتزا' && item.active), [state.items]);
   const preparations = useMemo(() => state.items.filter((item) => isPreparationCategory(item.category) && item.active), [state.items]);
   const items = snapshot?.items ?? [];
   const activeItem = (id: string) => items.find((item) => item.id === id);
@@ -213,38 +208,6 @@ export default function Operations() {
     });
   };
 
-  const updateSaleLine = (index: number, patch: Partial<SaleDraftLine>) => setSaleLines((lines) => lines.map((line, i) => i === index ? { ...line, ...patch } : line));
-  const setSaleProduct = (index: number, id: string) => {
-    const item = pizzas.find((pizza) => pizza.id === id);
-    updateSaleLine(index, { menu_item_id: id, unit_price: item?.price == null ? '' : String(item.price) });
-  };
-  const saveSale = () => {
-    if (!day) { toast('روزِ فروش را انتخاب کنید.', 'err'); return; }
-    if (!saleLines.length || saleLines.some((line) => !line.menu_item_id || n(line.qty) <= 0 || line.unit_price === '' || !Number.isFinite(Number(line.unit_price)))) {
-      toast('برای هر ردیف پیتزا، تعداد و قیمت واقعی فروش را وارد کنید.', 'err'); return;
-    }
-    void run('فروش ثبت شد؛ مواد طبق BOM و سس‌های آماده طبق FEFO از انبار کم شدند.', async () => {
-      await rpc('farya_record_sale', {
-        p_sold_at: localDateTimeISO(day),
-        p_lines: saleLines.map((line) => ({ menu_item_id: line.menu_item_id, qty: n(line.qty), unit_price: n(line.unit_price), discount_amount: n(line.discount_amount) })),
-        p_note: saleNote,
-      });
-      setSaleLines([{ menu_item_id: '', qty: '1', unit_price: '', discount_amount: '0' }]);
-      setSaleNote('');
-    });
-  };
-
-  const saveExpense = () => {
-    if (!day) { toast('روزِ هزینه را انتخاب کنید.', 'err'); return; }
-    if (!expense.category.trim() || n(expense.amount) < 0 || expense.amount === '') { toast('دسته و مبلغ هزینه را وارد کنید.', 'err'); return; }
-    void run('هزینهٔ عملیاتی ثبت شد و در سود و زیان روز آمد.', async () => {
-      await rpc('farya_add_operating_expense', {
-        p_occurred_at: localDateTimeISO(day), p_category: expense.category, p_amount: n(expense.amount), p_note: expense.note,
-      });
-      setExpense({ category: '', amount: '', note: '' });
-    });
-  };
-
   const saveTargets = () => void run('هدف‌های عملیاتی به‌روز شدند.', async () => {
     await rpc('farya_update_business_targets', {
       p_monthly_unit_goal: n(targets.monthlyUnits),
@@ -279,7 +242,7 @@ export default function Operations() {
   return (
     <div className="view ops-view" dir="rtl">
       <div className="ops-header card card-pad">
-        <div className="ops-heading"><div className="ops-heading-icon"><IconLayers size={22} /></div><div><h2>انبار و سود و زیان</h2><p>دفتر گردشِ اتمیک؛ ارزش‌گذاری میانگین موزون، برداشت FEFO و تازه‌سازی برخط.</p></div></div>
+        <div className="ops-heading"><div className="ops-heading-icon"><IconLayers size={22} /></div><div><h2>انبار و تولید</h2><p>دفتر گردشِ اتمیک؛ ارزش‌گذاری میانگین موزون، برداشت FEFO و تازه‌سازی برخط.</p></div></div>
         <div className="ops-heading-actions">
           <label className="ops-day">روزِ گزارش <input className="input" type="date" value={day} onChange={(event) => { const next = event.target.value || localToday(); setDay(next); void refresh(next); }} /></label>
           <Button onClick={() => void refresh()} disabled={loading}><IconRefresh size={15} /> {loading ? 'در حال تازه‌سازی…' : 'تازه‌سازی'}</Button>
@@ -290,7 +253,7 @@ export default function Operations() {
 
       <div className="ops-tabs" role="tablist" aria-label="عملیات انبار و سود و زیان">
         {([
-          ['stock', 'انبار و خرید'], ['production', 'تولید سس/نیمه‌ساخته'], ['sales', 'ثبت فروش'], ['pnl', 'سود و زیان روزانه'],
+          ['stock', 'انبار و خرید'], ['production', 'تولید سس/نیمه‌ساخته'], ['pnl', 'سود و زیان'],
         ] as Array<[Tab, string]>).map(([value, label]) => <button type="button" key={value} className={tab === value ? 'on' : ''} onClick={() => setTab(value)}>{label}</button>)}
       </div>
 
@@ -365,7 +328,7 @@ export default function Operations() {
             {items.length === 0 ? <Empty icon="📦" title="هنوز کارت انبار ندارید" /> : <div className="table-wrap"><table className="tbl ops-table"><thead><tr><th>قلم</th><th>نوع</th><th>موجودی</th><th>نقطهٔ سفارش</th><th>میانگین واحد</th><th>ارزش موجودی</th><th>انقضا</th><th>تنظیم</th></tr></thead><tbody>{items.map((item) => {
               const itemLots = (snapshot?.lots || []).filter((lot) => lot.item_id === item.id);
               const closest = itemLots.filter((lot) => lot.expires_on).sort((a, b) => String(a.expires_on).localeCompare(String(b.expires_on)))[0];
-              return <tr key={item.id}><td><b>{item.name}</b><div className="ops-subtext">{item.id}</div></td><td>{item.item_kind === 'prepared' ? 'سس/نیمه‌ساخته' : 'خام'}{!item.active && <div className="ops-subtext">غیرفعال · فقط تخلیهٔ موجودی باقی‌مانده</div>}</td><td className="n">{num(n(item.on_hand_qty), 3)} {item.base_unit}</td><td className="n">{n(item.reorder_point) > 0 ? `${num(n(item.reorder_point), 3)} ${item.base_unit}` : '—'}</td><td className="n">{money(item.weighted_avg_unit_cost)} / {item.base_unit}</td><td className="n"><b>{money(item.stock_value)}</b></td><td>{closest?.expires_on || (item.track_expiry ? 'لات/تاریخ ندارد' : '—')}</td><td>{item.active ? <Button onClick={() => openStockSettings(item)}>هشدارها</Button> : <span className="chip clay">غیرفعال</span>}</td></tr>;
+              return <tr key={item.id}><td><b>{item.name}</b><div className="ops-subtext">{item.id}</div></td><td>{item.item_kind === 'prepared' ? 'نیمه‌ساخته' : item.item_kind === 'finished' ? 'محصول نهایی' : 'مادهٔ خام'}{!item.active && <div className="ops-subtext">غیرفعال · فقط تخلیهٔ موجودی باقی‌مانده</div>}</td><td className="n">{num(n(item.on_hand_qty), 3)} {item.base_unit}</td><td className="n">{n(item.reorder_point) > 0 ? `${num(n(item.reorder_point), 3)} ${item.base_unit}` : '—'}</td><td className="n">{money(item.weighted_avg_unit_cost)} / {item.base_unit}</td><td className="n"><b>{money(item.stock_value)}</b></td><td>{closest?.expires_on || (item.track_expiry ? 'لات/تاریخ ندارد' : '—')}</td><td>{item.active ? <Button onClick={() => openStockSettings(item)}>هشدارها</Button> : <span className="chip clay">غیرفعال</span>}</td></tr>;
             })}</tbody></table></div>}
           </section>
 
@@ -397,44 +360,21 @@ export default function Operations() {
         </>
       )}
 
-      {tab === 'sales' && (
-        <>
-          <div className="ops-callout"><IconCheck size={18} /><div><b>ثبت دستی فروش</b><span>ثبت تعداد پیتزا، قیمت واقعی و تخفیف؛ مواد دستور و جعبه خودکار از انبار کم می‌شوند. فروش تنها وقتی ثبت می‌شود که موجودیِ همهٔ اقلام کافی و معتبر باشد.</span></div></div>
-          <section className="card ops-panel">
-            <div className="ops-form-grid"><Field label="روز فروش"><input className="input" type="date" value={day} onChange={(event) => { const next = event.target.value || localToday(); setDay(next); void refresh(next); }} /></Field><Field label="یادداشتِ فاکتور"><input className="input" value={saleNote} onChange={(event) => setSaleNote(event.target.value)} placeholder="شمارهٔ سفارش/کانال فروش" /></Field></div>
-            <div className="ops-sale-lines">
-              {saleLines.map((line, index) => <div className="ops-sale-line" key={index}>
-                <select className="select" value={line.menu_item_id} onChange={(event) => setSaleProduct(index, event.target.value)}><option value="">انتخاب پیتزا…</option>{pizzas.map((pizza) => <option key={pizza.id} value={pizza.id}>{pizza.name}</option>)}</select>
-                <label><span>تعداد</span><input className="input mono" type="number" min="0.001" step="1" value={line.qty} onChange={(event) => updateSaleLine(index, { qty: event.target.value })} /></label>
-                <label><span>قیمت واقعی/عدد</span><input className="input mono" type="number" min="0" step="1000" value={line.unit_price} onChange={(event) => updateSaleLine(index, { unit_price: event.target.value })} /></label>
-                <label><span>تخفیفِ ردیف</span><input className="input mono" type="number" min="0" step="1000" value={line.discount_amount} onChange={(event) => updateSaleLine(index, { discount_amount: event.target.value })} /></label>
-                <Button variant="danger" onClick={() => setSaleLines((current) => current.length > 1 ? current.filter((_, i) => i !== index) : [{ menu_item_id: '', qty: '1', unit_price: '', discount_amount: '0' }])}>×</Button>
-              </div>)}
-            </div>
-            <div className="ops-panel-actions"><Button onClick={() => setSaleLines((current) => [...current, { menu_item_id: '', qty: '1', unit_price: '', discount_amount: '0' }])}><IconPlus size={15} /> افزودن ردیف</Button><Button variant="primary" disabled={busy} onClick={saveSale}><IconCheck size={15} /> ثبت فروش و کسر BOM</Button></div>
-          </section>
-          <section className="card ops-panel"><div className="ops-panel-head"><div><h3>ثبت هزینهٔ روزانه</h3><p>هزینه‌های متغیر و موردی را جدا از سربار ماهانه وارد کنید تا در سود خالص همان روز لحاظ شوند.</p></div></div>
-            <div className="ops-form-grid"><Field label="دستهٔ هزینه"><input className="input" value={expense.category} onChange={(event) => setExpense({ ...expense, category: event.target.value })} placeholder="مثلاً حمل، کارمزد، خرید متفرقه" /></Field><Field label="مبلغ (تومان)"><input className="input mono" type="number" min="0" value={expense.amount} onChange={(event) => setExpense({ ...expense, amount: event.target.value })} /></Field><Field label="یادداشت"><input className="input" value={expense.note} onChange={(event) => setExpense({ ...expense, note: event.target.value })} /></Field></div>
-            <Button onClick={saveExpense} disabled={busy}><IconPlus size={15} /> ثبت هزینه</Button>
-          </section>
-        </>
-      )}
-
       {tab === 'pnl' && pnl && (
         <>
           <div className="ops-kpis ops-kpis-pnl">
-            <div className="card ops-kpi"><span>فروش خالص</span><strong>{money(pnl.net_revenue)}</strong><small>{num(n(pnl.units_sold))} پیتزا</small></div>
+            <div className="card ops-kpi"><span>فروش خالص</span><strong>{money(pnl.net_revenue)}</strong><small>{num(n(pnl.units_sold))} قلمِ فروخته‌شده؛ فاکتورها منبع فروش‌اند</small></div>
             <div className="card ops-kpi"><span>بهای موادِ فروش‌رفته</span><strong>{money(pnl.cogs)}</strong><small>میانگین موزون در لحظهٔ فروش</small></div>
             <div className="card ops-kpi"><span>ضایعات + هزینه‌های روز</span><strong>{money(n(pnl.waste_cost) + n(pnl.operating_expenses))}</strong><small>موردی؛ جدا از اجاره و حقوق ماهانه</small></div>
             <div className={`card ops-kpi ${n(pnl.net_profit) < 0 ? 'is-negative' : 'is-positive'}`}><span>سود/زیان خالصِ روز</span><strong>{money(pnl.net_profit)}</strong><small>پس از سهم روزانهٔ سربار ثابت {money(pnl.daily_fixed_overhead)}</small></div>
           </div>
           <section className="card ops-panel"><div className="ops-panel-head"><div><h3>هدف و عملکرد</h3><p>هدف تعداد روزانه از هدف ماهانه و تعداد روزهای همان ماه محاسبه می‌شود؛ اهداف فروش/سود را خودتان تعیین کنید.</p></div></div>
-            <div className="ops-form-grid"><Field label="هدف فروش ماهانه (تعداد پیتزا)"><input className="input mono" type="number" min="0" value={targets.monthlyUnits} onChange={(event) => setTargets({ ...targets, monthlyUnits: event.target.value })} /></Field><Field label="هدف فروش روزانه (تومان) · اختیاری"><input className="input mono" type="number" min="0" value={targets.dailyRevenue} onChange={(event) => setTargets({ ...targets, dailyRevenue: event.target.value })} /></Field><Field label="هدف سود خالص روزانه (تومان) · اختیاری"><input className="input mono" type="number" min="0" value={targets.dailyProfit} onChange={(event) => setTargets({ ...targets, dailyProfit: event.target.value })} /></Field></div>
+            <div className="ops-form-grid"><Field label="هدف فروش ماهانه (تعداد قلم نهایی)"><input className="input mono" type="number" min="0" value={targets.monthlyUnits} onChange={(event) => setTargets({ ...targets, monthlyUnits: event.target.value })} /></Field><Field label="هدف فروش روزانه (تومان) · اختیاری"><input className="input mono" type="number" min="0" value={targets.dailyRevenue} onChange={(event) => setTargets({ ...targets, dailyRevenue: event.target.value })} /></Field><Field label="هدف سود خالص روزانه (تومان) · اختیاری"><input className="input mono" type="number" min="0" value={targets.dailyProfit} onChange={(event) => setTargets({ ...targets, dailyProfit: event.target.value })} /></Field></div>
             <Button onClick={saveTargets} disabled={busy}><IconCheck size={15} /> ذخیرهٔ هدف‌ها</Button>
             <div className="ops-target-grid"><div><span>هدف تعدادی امروز</span><b>{num(n(pnl.daily_unit_goal), 1)} عدد</b></div><div><span>حاشیهٔ ناخالص امروز</span><b>{pnl.gross_margin == null ? '—' : pct(n(pnl.gross_margin), 1)}</b></div><div><span>تحقق هدف فروش</span><b>{pnl.revenue_goal_attainment_pct == null ? 'هدف فروش تعیین نشده' : pct(n(pnl.revenue_goal_attainment_pct) / 100, 1)}</b></div><div><span>تحقق هدف سود</span><b>{pnl.profit_goal_attainment_pct == null ? 'هدف سود تعیین نشده' : pct(n(pnl.profit_goal_attainment_pct) / 100, 1)}</b></div></div>
           </section>
           <section className="card ops-panel"><div className="card-head"><div><h3>فروش‌های ثبت‌شده در روز</h3></div></div>
-            {snapshot?.today_sales.length ? <div className="table-wrap"><table className="tbl ops-table"><thead><tr><th>زمان</th><th>پیتزا</th><th>تعداد</th><th>فروش خالص</th><th>بهای مصرف</th></tr></thead><tbody>{snapshot.today_sales.map((sale, index) => <tr key={`${sale.sale_id}-${index}`}><td>{new Date(sale.sold_at).toLocaleTimeString('fa-IR',{timeZone:'Asia/Tehran',hour:'2-digit',minute:'2-digit'})}</td><td>{sale.item_name}</td><td className="n">{num(n(sale.qty),2)}</td><td className="n">{money(sale.net_revenue)}</td><td className="n">{money(sale.cogs)}</td></tr>)}</tbody></table></div> : <div className="ops-empty-hint">فروشی برای این روز ثبت نشده است.</div>}
+            {snapshot?.today_sales.length ? <div className="table-wrap"><table className="tbl ops-table"><thead><tr><th>زمان</th><th>محصول نهایی</th><th>تعداد</th><th>فروش خالص</th><th>بهای مصرف</th></tr></thead><tbody>{snapshot.today_sales.map((sale, index) => <tr key={`${sale.sale_id}-${index}`}><td>{new Date(sale.sold_at).toLocaleTimeString('fa-IR',{timeZone:'Asia/Tehran',hour:'2-digit',minute:'2-digit'})}</td><td>{sale.item_name}</td><td className="n">{num(n(sale.qty),2)}</td><td className="n">{money(sale.net_revenue)}</td><td className="n">{money(sale.cogs)}</td></tr>)}</tbody></table></div> : <div className="ops-empty-hint">فروشی برای این روز ثبت نشده است.</div>}
           </section>
           <section className="card ops-panel"><div className="card-head"><div><h3>هزینه‌های ثبت‌شده در روز</h3></div></div>
             {snapshot?.today_expenses.length ? <div className="table-wrap"><table className="tbl ops-table"><thead><tr><th>ساعت</th><th>دسته</th><th>مبلغ</th><th>یادداشت</th></tr></thead><tbody>{snapshot.today_expenses.map((row) => <tr key={row.id}><td>{new Date(row.occurred_at).toLocaleTimeString('fa-IR',{timeZone:'Asia/Tehran',hour:'2-digit',minute:'2-digit'})}</td><td>{row.category}</td><td className="n">{money(row.amount)}</td><td>{row.note || '—'}</td></tr>)}</tbody></table></div> : <div className="ops-empty-hint">هزینهٔ متغیری برای این روز ثبت نشده است.</div>}

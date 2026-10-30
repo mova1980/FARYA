@@ -6,8 +6,8 @@
 --
 --  IMPORTANT: Never run this full bootstrap on the existing production project.
 --  The app's save_state() rebuilds relational tables and the seed is legacy data.
---  Existing production project: use only the tracked additive migration
---  add_public_menu_feed (source: supabase/07_public_menu.sql), already applied.
+--  Existing production project: 07_public_menu.sql is already applied.
+--  10_operations_inventory_sales.sql is a separate staging-only migration; do not apply to production without explicit approval.
 --
 --  This is plain SQL for the Supabase SQL Editor; it contains no psql commands.
 -- ============================================================================
@@ -215,6 +215,10 @@ create table if not exists public.settings (
   id                  smallint     primary key default 1 check (id = 1),
   restaurant          text         not null default 'FARYA',
   restaurant_fa       text         not null default 'فریا',
+  restaurant_phone    text         not null default '',
+  restaurant_address  text         not null default '',
+  taxpayer_id         text         not null default '',
+  economic_code       text         not null default '',
   chef                text         not null default 'سرآشپز فرناز',
   currency            text         not null default 'تومان',
   target_margin       numeric      not null default 0.35
@@ -1046,6 +1050,10 @@ begin
   update public.settings s set
     restaurant          = coalesce(p_patch->>'restaurant', s.restaurant),
     restaurant_fa       = coalesce(p_patch->>'restaurantFa', s.restaurant_fa),
+    restaurant_phone    = coalesce(p_patch->>'restaurantPhone', s.restaurant_phone),
+    restaurant_address  = coalesce(p_patch->>'restaurantAddress', s.restaurant_address),
+    taxpayer_id         = coalesce(p_patch->>'taxpayerId', s.taxpayer_id),
+    economic_code       = coalesce(p_patch->>'economicCode', s.economic_code),
     chef                = coalesce(p_patch->>'chef', s.chef),
     currency            = coalesce(p_patch->>'currency', s.currency),
     target_margin       = coalesce((p_patch->>'targetMargin')::numeric, s.target_margin),
@@ -1172,6 +1180,10 @@ returns jsonb language sql stable as $$
       select jsonb_build_object(          -- نام‌ها باید camelCase باشند (قراردادِ برنامه)
                'restaurant',          s.restaurant,
                'restaurantFa',        s.restaurant_fa,
+               'restaurantPhone',     s.restaurant_phone,
+               'restaurantAddress',   s.restaurant_address,
+               'taxpayerId',          s.taxpayer_id,
+               'economicCode',        s.economic_code,
                'chef',                s.chef,
                'currency',            s.currency,
                'overheadExtraCoef',   s.overhead_extra_coef,
@@ -1266,12 +1278,12 @@ begin
 
   -- سربارها (ابتدا، چون آیتم‌ها به آن‌ها ارجاع می‌دهند)
   -- ترتیبِ حذف رعایتِ کلیدهای خارجی است
-  delete from public.item_overheads;
-  delete from public.recipe_steps;
-  delete from public.price_points;
-  delete from public.ingredients;      -- به menu_items ارجاع دارد → پیش از آن حذف می‌شود
-  delete from public.menu_items;
-  delete from public.overheads;
+  delete from public.item_overheads where true;
+  delete from public.recipe_steps where true;
+  delete from public.price_points where true;
+  delete from public.ingredients where true;      -- به menu_items ارجاع دارد → پیش از آن حذف می‌شود
+  delete from public.menu_items where true;
+  delete from public.overheads where true;
 
   v_k := 0;
   for v_ovh in select * from jsonb_array_elements(coalesce(p_state->'overheads', '[]'::jsonb))
@@ -1337,8 +1349,7 @@ begin
 
   -- معادلِ میلادیِ تاریخِ ایجاد
   update public.ingredients
-     set created_at = coalesce(public.jalali_to_gregorian(created_jdate), current_date)
-   where id is not null;
+     set created_at = coalesce(public.jalali_to_gregorian(created_jdate), current_date);
 
   -- تاریخچهٔ قیمت‌ها (همان ترتیبِ آرایهٔ برنامه → ستونِ seq ترتیب را حفظ می‌کند)
   insert into public.price_points (ingredient_id, price, jdate, note)

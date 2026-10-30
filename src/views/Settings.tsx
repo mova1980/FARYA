@@ -53,6 +53,23 @@ export default function Settings() {
               <input className="input" value={s.restaurantFa}
                 onChange={(e) => set({ restaurantFa: e.target.value })} />
             </Field>
+            <Field label="تلفن رستوران · چاپ روی فیش">
+              <input className="input" inputMode="tel" value={s.restaurantPhone || ''}
+                onChange={(e) => set({ restaurantPhone: e.target.value })} />
+            </Field>
+            <Field label="نشانی شعبه · چاپ روی فیش">
+              <input className="input" value={s.restaurantAddress || ''}
+                onChange={(e) => set({ restaurantAddress: e.target.value })} />
+            </Field>
+            <Field label="شناسهٔ مالیاتی · فقط مقدار تأییدشده">
+              <input className="input" value={s.taxpayerId || ''}
+                onChange={(e) => set({ taxpayerId: e.target.value })} />
+            </Field>
+            <Field label="کد اقتصادی · فقط مقدار تأییدشده">
+              <input className="input" value={s.economicCode || ''}
+                onChange={(e) => set({ economicCode: e.target.value })} />
+            </Field>
+            <div className="hint">این مشخصات اختیاری‌اند؛ فقط اطلاعات رسمیِ تأییدشده را وارد کنید. ثبت آن‌ها، اتصال به سامانهٔ مؤدیان ایجاد نمی‌کند.</div>
             <Field label="نام سرآشپز">
               <input className="input" value={s.chef}
                 onChange={(e) => set({ chef: e.target.value })} />

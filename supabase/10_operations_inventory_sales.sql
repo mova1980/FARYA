@@ -1,6 +1,8 @@
 -- FARYA | Operational inventory, sauce/preparation costing, sales and daily P&L
 -- STAGING ONLY: do not apply to production until reviewed, tested and explicitly approved.
 -- Requires the existing FARYA schema, authenticated chef accounts, and save_state() repair.
+-- Data prerequisite: the post-reset seven-pizza allowlist and ingredient id 'inv-pizza-box'.
+-- Never rerun the one-time reset file 08 to satisfy this prerequisite.
 -- Initial inventory quantities are intentionally zero: perform an opening stock count
 -- with real lot expiry dates; historical notes are not treated as verified stock.
 

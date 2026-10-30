@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import '../styles/restaurant.css';
 import { PIZZAS, type Pizza } from '../data/pizzas';
 
+const STORY_COPY = 'در فریا، هر پیتزا با الهام از سبک ناپولیتن و برای لحظه‌هایی ساخته می‌شود که دوست داری کمی بیشتر دورِ میز بمانی. موادِ خوش‌طعم، خمیرِ سبک و گرمایِ تنور؛ همین سه‌تا، شروعِ قصه‌اند.';
+
 function Arrow({ diagonal = false }: { diagonal?: boolean }) {
   return <svg className="site-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d={diagonal ? 'M7 17 17 7M8 7h9v9' : 'M4 12h15m-6-6 6 6-6 6'} /></svg>;
 }
@@ -76,6 +78,8 @@ export default function RestaurantHome() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scroll, setScroll] = useState(0);
   const [activePizza, setActivePizza] = useState<string | null>(null);
+  const [storyTyped, setStoryTyped] = useState('');
+  const storyCopyRef = useRef<HTMLParagraphElement>(null);
   const pizzaTriggerRef = useRef<HTMLButtonElement>(null);
   const heroRef = useRef<HTMLElement>(null);
 
@@ -107,6 +111,41 @@ export default function RestaurantHome() {
   }, []);
 
   useEffect(() => {
+    const node = storyCopyRef.current;
+    if (!node) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+      setStoryTyped(STORY_COPY);
+      return;
+    }
+
+    let startTimer = 0;
+    let typeTimer = 0;
+    let index = 0;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      startTimer = window.setTimeout(() => {
+        const typeNextCharacter = () => {
+          index += 1;
+          setStoryTyped(STORY_COPY.slice(0, index));
+          if (index >= STORY_COPY.length) return;
+          const progress = index / STORY_COPY.length;
+          const character = STORY_COPY[index - 1];
+          const punctuationPause = /[؛.!؟،]/.test(character) ? 145 : 0;
+          typeTimer = window.setTimeout(typeNextCharacter, 48 - Math.round(progress * 15) + punctuationPause);
+        };
+        typeNextCharacter();
+      }, 720);
+    }, { threshold: 0.35 });
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(startTimer);
+      window.clearTimeout(typeTimer);
+    };
+  }, []);
+
+  useEffect(() => {
     const node = heroRef.current;
     if (!node || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const onMove = (event: PointerEvent) => {
@@ -128,7 +167,7 @@ export default function RestaurantHome() {
   const closePizzaModal = useCallback(() => setActivePizza(null), []);
   const activePizzaData = PIZZAS.find((pizza) => pizza.id === activePizza) ?? null;
   const callNumber = 'tel:02634422723';
-  const mapUrl = 'https://maps.app.goo.gl/6Q6C4EQ8Ugo4gg3v9';
+  const mapUrl = 'https://maps.app.goo.gl/FXQoJG5YNpM3Axk46';
 
   return (
     <main className="restaurant-site" dir="rtl">
@@ -196,10 +235,18 @@ export default function RestaurantHome() {
         <div className="intro-main" data-reveal>
           <p className="section-eyebrow">از تنور تا دورهمی</p>
           <h2>آتش، خمیر،<br /><em>یک حالِ خوب.</em></h2>
-          <p className="intro-copy intro-copy-write" data-reveal>در فریا، هر پیتزا با الهام از سبک ناپولیتن و برای لحظه‌هایی ساخته می‌شود که دوست داری کمی بیشتر دورِ میز بمانی. موادِ خوش‌طعم، خمیرِ سبک و گرمایِ تنور؛ همین سه‌تا، شروعِ قصه‌اند.</p>
+          <p className={`intro-copy intro-copy-write${storyTyped.length === STORY_COPY.length ? ' is-typed' : ''}`} data-reveal ref={storyCopyRef} dir="rtl" lang="fa" aria-label={STORY_COPY}>
+            <span className="story-typewriter" aria-hidden="true">{storyTyped}<i className="story-caret" /></span>
+          </p>
           <a className="text-link" href="#menu">قصهٔ طعم‌ها را ببین <Arrow /></a>
         </div>
-        <div className="intro-stamp" aria-hidden="true"><span>WOOD</span><b>F</b><span>FIRE</span><i>•</i><span>NAPOLI</span></div>
+        <div className="intro-stamp" role="img" aria-label="مهر آتشین فریا، پیتزای ناپولیتن تنوری">
+          <span className="stamp-orbit" aria-hidden="true" />
+          <span className="stamp-topline" aria-hidden="true">WOOD · FIRE · SOUL</span>
+          <span className="stamp-logo"><img src="/images/logo-farya.webp" alt="" /></span>
+          <span className="stamp-bottomline" aria-hidden="true">FARYA · NAPOLI</span>
+          <i aria-hidden="true">✳</i>
+        </div>
       </section>
 
       <section className="site-menu-section" id="menu">
@@ -255,7 +302,7 @@ export default function RestaurantHome() {
           <div className="visit-card-top"><span className="visit-pin">✳</span><span>FARYA · KARAJ</span></div>
           <div className="visit-map-embed">
             <div className="visit-map-fallback" aria-hidden="true"><span>گوگل مپس · گوهردشت</span><b>35.849030, 50.975500</b></div>
-            <iframe title="نقشهٔ فریا در ضلع جنوبی پارک هفتم گوهردشت" src="https://maps.google.com/maps?q=35.849030%2C50.975500&z=16&output=embed" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+            <iframe title="نقشهٔ فریا در ضلع جنوبی پارک هفتم گوهردشت" src="https://maps.google.com/maps?q=35.8490467%2C50.9755121&z=16&output=embed" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
             <div className="map-pin" aria-hidden="true"><span>F</span></div>
             <span className="map-label">فریا · ضلع جنوبی پارک هفتم</span>
           </div>
@@ -278,7 +325,12 @@ export default function RestaurantHome() {
           <div className="footer-links"><span>بچرخ توی فریا</span><a href="#story">داستانِ فریا</a><a href="#menu">پیتزاهای فریا</a><a href="/menu">منوی آنلاین</a><a href="#visit">نشانی و تماس</a><a href="/cost">دفترِ بهای تمام‌شده</a>
             <a className="footer-menu-qr" href="/images/menu-qr.svg" download="farya-online-menu-qr.svg"><img src="/images/menu-qr.svg" alt="کد QR منوی آنلاین فریا" /><span>دریافت کد QR منو</span></a>
           </div>
-          <div className="footer-contact"><span>پیدایمان کن</span><a href={callNumber} dir="ltr">026 — 3442 2723 <Arrow diagonal /></a><p>کرج، گوهردشت<br />ضلع جنوبیِ پارکِ هفتم</p><a className="footer-map" href={mapUrl} target="_blank" rel="noreferrer">مسیریابی <Arrow diagonal /></a></div>
+          <div className="footer-contact">
+            <div className="footer-contact-heading"><span className="footer-contact-spark" aria-hidden="true">✳</span><span><small>همیشه نزدیکیم</small><strong>پیدایمان کن</strong></span></div>
+            <a className="footer-phone" href={callNumber} dir="ltr">026 — 3442 2723 <Arrow diagonal /></a>
+            <p className="footer-address"><span className="footer-pin" aria-hidden="true">⌖</span><span>کرج، گوهردشت<br />ضلع جنوبیِ پارکِ هفتم</span></p>
+            <a className="footer-map" href={mapUrl} target="_blank" rel="noreferrer"><span className="footer-map-icon" aria-hidden="true">↗</span><span className="footer-map-copy"><b>مسیر تا تنور</b><small>باز کردنِ فریا در نقشه</small></span><Arrow diagonal /></a>
+          </div>
         </div>
         <div className="footer-bottom section-shell"><span>© {new Date().getFullYear()} FARYA PIZZA · KARAJ</span><span>Good Food <b>♥</b> Good Mood</span><a href="/cost">ورودِ سرآشپز <Arrow diagonal /></a></div>
       </footer>

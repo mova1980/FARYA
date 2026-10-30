@@ -71,6 +71,11 @@ export interface Overhead {
 export interface Settings {
   restaurant: string;
   restaurantFa: string;
+  /** Optional seller/contact details printed on internal customer receipts. */
+  restaurantPhone?: string;
+  restaurantAddress?: string;
+  taxpayerId?: string;
+  economicCode?: string;
   chef: string;
   currency: string;
   /** ضریب اضافی سراسری که روی سربار اعمال می‌شود */
