@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 // Keep this in sync with the canonical online-menu route and the exact domain.
-const MENU_URL = 'https://farya-pitza.ir/menu';
+const MENU_URL = 'https://www.farya-pitza.ir/menu';
 const here = dirname(fileURLToPath(import.meta.url));
 const output = join(here, '..', 'public', 'images', 'menu-qr.svg');
 mkdirSync(dirname(output), { recursive: true });
