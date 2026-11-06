@@ -323,7 +323,7 @@ export default function RestaurantHome() {
           <div className="footer-brand-col"><a href="/" className="footer-logo" aria-label="فریا، صفحهٔ اصلی"><img src="/images/logo-farya.webp" alt="لوگوی FARYA" /></a>
             <p>Italian style. Oven baked.<br />یک حالِ خوب، هر بار.</p></div>
           <div className="footer-links"><span>بچرخ توی فریا</span><a href="#story">داستانِ فریا</a><a href="#menu">پیتزاهای فریا</a><a href="/menu">منوی آنلاین</a><a href="#visit">نشانی و تماس</a><a href="/cost">دفترِ بهای تمام‌شده</a>
-            <a className="footer-menu-qr" href="/images/menu-qr.svg" download="farya-online-menu-qr.svg"><img src="/images/menu-qr.svg" alt="کد QR منوی آنلاین فریا" /><span>دریافت کد QR منو</span></a>
+            <a className="footer-menu-qr" href="/menu" aria-label="باز کردن منوی آنلاین پیتزاهای فریا"><img src="/images/menu-qr.svg" alt="کد QR منوی آنلاین فریا" /><span>دیدن منوی آنلاین</span></a>
           </div>
           <div className="footer-contact">
             <div className="footer-contact-heading"><span className="footer-contact-spark" aria-hidden="true">✳</span><span><small>همیشه نزدیکیم</small><strong>پیدایمان کن</strong></span></div>

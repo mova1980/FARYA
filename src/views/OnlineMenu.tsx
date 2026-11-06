@@ -63,44 +63,19 @@ export default function OnlineMenu() {
       : status === 'unconfigured'
         ? 'نمایش قیمت آنلاین پس از اتصال امن به دفتر قیمت‌گذاری فعال می‌شود.'
         : liveCount === PIZZAS.length
-          ? 'قیمت‌ها از دفتر بهای تمام‌شدهٔ فریا خوانده شده‌اند.'
+          ? null
           : 'برای قیمت روز، با فریا تماس بگیرید.';
 
   return (
-    <main className="online-menu" dir="rtl">
-      <header className="online-menu-header">
-        <a className="online-menu-brand" href="/" aria-label="بازگشت به سایت فریا">
-          <img src="/images/logo-farya.webp" alt="لوگوی FARYA" />
-          <span><b>FARYA</b><small>پیتزای تنوری ناپولیتن</small></span>
-        </a>
-        <nav aria-label="پیمایش منوی آنلاین">
-          <a href="/">صفحهٔ اصلی</a>
-          <a href="#online-pizzas">پیتزاها</a>
-          <a className="online-menu-call" href={PHONE_HREF}>سفارش تلفنی <span aria-hidden="true">↗</span></a>
-        </nav>
-      </header>
-
-      <section className="online-menu-hero">
-        <div className="online-menu-hero-image" aria-hidden="true" />
-        <div className="online-menu-hero-shade" />
-        <div className="online-menu-hero-content">
-          <span className="online-kicker"><i /> FARYA · KARAJ</span>
-          <p>هفت قصه، یک تنور</p>
-          <h1>منوی آنلاین<br /><em>فریا.</em></h1>
-          <span className="online-menu-intro">ترکیب‌ها همان‌اند که در منوی فریا می‌بینی؛ قیمتِ قابل‌نمایش از دفتر قیمت‌گذاری خوانده می‌شود.</span>
-          <a href="#online-pizzas" className="online-scroll-link">دیدن پیتزاها <span aria-hidden="true">↓</span></a>
-        </div>
-        <span className="online-hero-index">01 <i /> 07</span>
-      </section>
-
+    <main className="online-menu online-menu-catalog" dir="rtl">
       <section className="online-pizzas-section" id="online-pizzas">
         <div className="online-section-heading">
-          <div><span className="online-section-index">01 / منوی امضا</span><h2>طعمِ محبوبت را<br /><em>پیدا کن.</em></h2></div>
-          <div className={`online-price-status is-${status}`} aria-live="polite">
+          <div><span className="online-section-index">منوی امضای فریا</span><h1>پیتزاهای فریا</h1></div>
+          {statusText && <div className={`online-price-status is-${status}`} aria-live="polite">
             <span className="online-status-dot" />
             <p>{statusText}</p>
             <button type="button" onClick={() => setRefresh((value) => value + 1)} aria-label="تازه‌سازی قیمت‌ها">↻</button>
-          </div>
+          </div>}
         </div>
 
         <div className="online-pizza-grid">
@@ -134,13 +109,6 @@ export default function OnlineMenu() {
         <p className="online-menu-disclaimer">قیمت فقط زمانی نمایش داده می‌شود که برای همین کدِ پیتزا در دفتر بهای فریا ثبت شده باشد؛ در غیر این صورت از فریا استعلام بگیر.</p>
       </section>
 
-      <section className="online-menu-end">
-        <img src="/images/logo-farya.webp" alt="" aria-hidden="true" />
-        <span>خمیر آماده‌ست. تنور روشنه.</span>
-        <h2>حالا نوبتِ <em>توست.</em></h2>
-        <a href={PHONE_HREF}>تماس برای سفارش · ۰۲۶ ۳۴۴۲۲۷۲۳</a>
-        <a className="online-back-home" href="/">بازگشت به صفحهٔ اصلی فریا</a>
-      </section>
     </main>
   );
 }
