@@ -4,12 +4,17 @@ import { Button, Empty, MoneyInput, SearchBox, Seg } from '../components/ui';
 import { faDigits, num, pct, roundTo } from '../lib/format';
 import { IconBolt, IconRefresh, IconDownload } from '../components/Icons';
 import { useMedia } from '../lib/media';
+import { localMenuImageUrl, publicMenuImageUrl, useMenuImages } from '../lib/menu-images';
 
 type Tab = 'table' | 'cards';
 
 export default function Pricing() {
   const { state, dispatch, engine, toast, exportCsv } = useStore();
   const { mobile } = useMedia();
+  const { images: storedImages } = useMenuImages();
+  const imageUrl = (item: { id: string; image?: string }) => storedImages[item.id]
+    ? publicMenuImageUrl(storedImages[item.id].object_path)
+    : localMenuImageUrl(item.image);
   const [tab, setTab] = useState<Tab>('table');
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('');
@@ -124,11 +129,11 @@ export default function Pricing() {
               {rows.map(({ item, c }) => {
                 const weak = c.costComplete && (c.margin ?? 1) < state.settings.targetMargin;
                 const heavy = (c.foodCost ?? 0) > 0.4;
+                const img = imageUrl(item);
                 return (
                   <div className="row-card" key={item.id} style={{ cursor: 'default' }}>
                     <div className="rc-head">
-                      <div className="list-thumb" style={{ width: 40, height: 40, flexBasis: 40, borderRadius: 12 }}
-                        {...(item.image ? { style: { backgroundImage: `url(/img/${item.image})`, width: 40, height: 40, flexBasis: 40, borderRadius: 12 } } : {})} />
+                      <div className="list-thumb" style={{ width: 40, height: 40, flexBasis: 40, borderRadius: 12, ...(img ? { backgroundImage: `url(${img})` } : {}) }} />
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <div className="rc-title">{item.name}</div>
                         <div className="rc-sub">{item.category}</div>
@@ -196,12 +201,12 @@ export default function Pricing() {
                   {rows.map(({ item, c }) => {
                     const weak = c.costComplete && (c.margin ?? 1) < state.settings.targetMargin;
                     const heavy = (c.foodCost ?? 0) > 0.4;
+                    const img = imageUrl(item);
                     return (
                       <tr key={item.id}>
                         <td>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <div className="list-thumb" style={{ width: 34, height: 34, flexBasis: 34 }}
-                              {...(item.image ? { style: { backgroundImage: `url(/img/${item.image})`, width: 34, height: 34, flexBasis: 34 } } : {})} />
+                            <div className="list-thumb" style={{ width: 34, height: 34, flexBasis: 34, ...(img ? { backgroundImage: `url(${img})` } : {}) }} />
                             <div>
                               <div style={{ fontWeight: 600 }}>{item.name}</div>
                               <div style={{ fontSize: 11, color: 'var(--muted)' }}>{item.category}</div>
@@ -249,14 +254,15 @@ export default function Pricing() {
             <div className="menu-grid">
               {rows.map(({ item, c }) => {
                 const weak = c.costComplete && (c.margin ?? 1) < state.settings.targetMargin;
+                const img = imageUrl(item);
                 const ings = item.recipe
                   .map((r) => state.ingredients.find((i) => i.id === r.ingredientId)?.name)
                   .filter(Boolean).slice(0, 4).join('، ');
                 return (
                   <div className="menu-card" key={item.id}>
                     <div className="ph">
-                      {item.image
-                        ? <img src={`/img/${item.image}`} alt="" />
+                      {img
+                        ? <img src={img} alt={item.name} />
                         : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(140deg,#2f6b4c,#0c110d)' }} />}
                       <div className="grad" />
                       <span className="cat">{item.category}</span>

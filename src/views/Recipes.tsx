@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useStore, CATEGORIES } from '../lib/store';
 import { manualPrice } from '../lib/calc';
 import { Button, Empty, Field, Modal, MoneyInput, SearchBox, Switch } from '../components/ui';
@@ -6,8 +6,36 @@ import { faDigits, num, pct, uid } from '../lib/format';
 import { IconPlus, IconTrash, IconEdit, IconCheck, IconCopy, IconLayers, IconBolt, IconChevron } from '../components/Icons';
 import { useMedia } from '../lib/media';
 import { isPreparationCategory, type MenuItem, type RecipeStep } from '../lib/types';
+import { getSupabase, isSupabaseConfigured } from '../lib/supabase';
+import { MENU_IMAGE_BUCKET, localMenuImageUrl, publicMenuImageUrl, useMenuImages } from '../lib/menu-images';
+import '../styles/menu-images.css';
 
 const IMAGES = ['pizza.jpg', 'burger.jpg', 'pasta.jpg', 'salad.jpg', 'bread.jpg', 'dessert.jpg', 'beef.jpg', ''];
+
+async function prepareMenuImage(file: File): Promise<File> {
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('فقط فایل JPG، PNG یا WebP قابل قبول است.');
+  if (file.size > 18 * 1024 * 1024) throw new Error('حجم فایل اولیه نباید بیشتر از ۱۸ مگابایت باشد.');
+  if (typeof createImageBitmap !== 'function') {
+    if (file.size > 8 * 1024 * 1024) throw new Error('این مرورگر امکان فشرده‌سازی ندارد؛ فایل کوچک‌تر از ۸ مگابایت انتخاب کنید.');
+    return file;
+  }
+  const bitmap = await createImageBitmap(file);
+  try {
+    const scale = Math.min(1, 1800 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('پردازش تصویر در این مرورگر ممکن نشد.');
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/webp', 0.84));
+    if (!blob) throw new Error('تبدیل تصویر به فرمت پایدار ممکن نشد.');
+    if (blob.size > 8 * 1024 * 1024) throw new Error('حجم تصویر پس از فشرده‌سازی هنوز بیشتر از ۸ مگابایت است.');
+    return new File([blob], `${file.name.replace(/\\.[^.]+$/, '') || 'pizza'}.webp`, { type: 'image/webp', lastModified: Date.now() });
+  } finally {
+    bitmap.close();
+  }
+}
 
 const blankItem = (): MenuItem => ({
   id: uid('item'),
@@ -33,6 +61,9 @@ const blankItem = (): MenuItem => ({
 export default function Recipes() {
   const { state, dispatch, engine, toast } = useStore();
   const { mobile } = useMedia();
+  const { images: storedImages, setImages: setStoredImages, loading: imagesLoading, loadError: imagesError } = useMenuImages();
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [imageBusy, setImageBusy] = useState(false);
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('');
   const [selId, setSelId] = useState<string>(state.items[0]?.id || '');
@@ -54,12 +85,81 @@ export default function Recipes() {
   }), [state.items, state.ingredients, q, cat]);
 
   const sel = items.find((i) => i.id === selId) || items[0];
+  const selImage = sel ? imageUrl(sel) : '';
   const selIdSafe = sel?.id;
   const comp = sel ? engine.byItem[selIdSafe] : null;
 
   const ingName = (id: string) => state.ingredients.find((i) => i.id === id)?.name || '—';
   const ingUnit = (id: string) => state.ingredients.find((i) => i.id === id)?.unit || '';
   const ingPrice = (id: string) => engine.priceOf[id] ?? manualPrice(state.ingredients.find((i) => i.id === id));
+  function imageUrl(item: MenuItem) {
+    return storedImages[item.id]
+      ? publicMenuImageUrl(storedImages[item.id].object_path)
+      : localMenuImageUrl(item.image);
+  }
+
+  const uploadImage = async (file?: File) => {
+    if (!file) return;
+    if (!isSupabaseConfigured) { toast('برای ذخیرهٔ همیشگی عکس، اتصال Supabase را تنظیم کنید.', 'err'); return; }
+    if (!editing || !form.id || form.category !== 'پیتزا') { toast('عکس فقط برای پیتزای ذخیره‌شده قابل ثبت است.', 'warn'); return; }
+    const sb = getSupabase();
+    if (!sb) { toast('اتصال پایگاه‌داده در دسترس نیست.', 'err'); return; }
+    setImageBusy(true);
+    try {
+      const prepared = await prepareMenuImage(file);
+      const safeId = form.id.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80) || 'pizza';
+      const path = `items/${safeId}/${crypto.randomUUID()}.webp`;
+      const { error: uploadError } = await sb.storage.from(MENU_IMAGE_BUCKET).upload(path, prepared, {
+        contentType: prepared.type, cacheControl: '31536000', upsert: false,
+      });
+      if (uploadError) throw uploadError;
+      const previous = storedImages[form.id];
+      const { error: rowError } = await sb.from('farya_menu_item_images').upsert({
+        item_id: form.id, object_path: path, content_type: prepared.type, size_bytes: prepared.size,
+      }, { onConflict: 'item_id' });
+      if (rowError) {
+        await sb.storage.from(MENU_IMAGE_BUCKET).remove([path]);
+        throw rowError;
+      }
+      setStoredImages((current) => ({ ...current, [form.id]: {
+        item_id: form.id, object_path: path, content_type: prepared.type,
+        size_bytes: prepared.size, updated_at: new Date().toISOString(),
+      } }));
+      if (previous?.object_path) {
+        const { error: removeError } = await sb.storage.from(MENU_IMAGE_BUCKET).remove([previous.object_path]);
+        if (removeError) toast('تصویر جدید ذخیره شد؛ پاک‌سازی فایل قدیمی در Storage کامل نشد.', 'warn');
+        else toast('تصویر جدید در فضای پایدار ذخیره و جایگزین شد.', 'ok');
+      } else toast('تصویر در فضای پایدار ذخیره شد.', 'ok');
+    } catch (error) {
+      toast(error instanceof Error ? error.message : String(error), 'err');
+    } finally {
+      setImageBusy(false);
+      if (imageInputRef.current) imageInputRef.current.value = '';
+    }
+  };
+
+  const deleteUploadedImage = async () => {
+    const image = storedImages[form.id];
+    if (!image) return;
+    if (!window.confirm(`تصویر بارگذاری‌شدهٔ «${form.name}» حذف شود؟`)) return;
+    const sb = getSupabase();
+    if (!sb) { toast('اتصال پایگاه‌داده در دسترس نیست.', 'err'); return; }
+    setImageBusy(true);
+    try {
+      const { error: rowError } = await sb.from('farya_menu_item_images').delete().eq('item_id', form.id);
+      if (rowError) throw rowError;
+      setStoredImages((current) => {
+        const next = { ...current };
+        delete next[form.id];
+        return next;
+      });
+      const { error: removeError } = await sb.storage.from(MENU_IMAGE_BUCKET).remove([image.object_path]);
+      if (removeError) toast('ارجاع عکس حذف شد، اما حذف فایل ذخیره‌شده کامل نشد.', 'warn');
+      else toast('تصویر بارگذاری‌شده حذف شد.', 'ok');
+    } catch (error) {
+      toast(error instanceof Error ? error.message : String(error), 'err');
+    } finally { setImageBusy(false); }
+  };
 
   const openCreate = () => { toast('منوی فروش عمداً فقط هفت پیتزای اصلی را دارد؛ برای سس/نیمه‌ساخته از بخش مستقل آن‌ها استفاده کنید.', 'warn'); };
   const openEdit = () => { if (!sel) return; setEditing(true); setForm({ ...sel }); setFormOpen(true); };
@@ -137,11 +237,12 @@ export default function Recipes() {
           <div>
             {items.map((i) => {
               const c = engine.byItem[i.id];
+              const img = imageUrl(i);
               return (
                 <div key={i.id} className={`list-item ${i.id === selIdSafe ? 'on' : ''}`}
                   onClick={() => { setSelId(i.id); if (mobile) setShowDetail(true); }}>
-                  <div className="list-thumb" style={i.image
-                    ? { backgroundImage: `url(/img/${i.image})` }
+                  <div className="list-thumb" style={img
+                    ? { backgroundImage: `url(${img})` }
                     : { background: 'linear-gradient(140deg,#2f6b4c,#0c110d)' }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div className="list-title">{i.name}</div>
@@ -174,8 +275,8 @@ export default function Recipes() {
           {!sel ? <Empty icon="📖" title="آیتمی انتخاب نشده" /> : (
             <>
               <div className="detail-hero">
-                {sel.image
-                  ? <img src={`/img/${sel.image}`} alt="" />
+                {selImage
+                  ? <img src={selImage} alt={sel.name} />
                   : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(120deg,#123021,#0c110d)' }} />}
                 <div className="scrim" />
                 <div className="txt">
@@ -520,21 +621,36 @@ export default function Recipes() {
               </Field>
             </>
           )}
-          <Field label="تصویر" full>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {IMAGES.map((im) => (
-                <button key={im || 'none'} type="button"
-                  onClick={() => setForm({ ...form, image: im })}
-                  style={{
-                    width: 76, height: 52, borderRadius: 10, overflow: 'hidden', padding: 0,
-                    border: form.image === im ? '2px solid var(--moss)' : '1px solid var(--line)',
-                    background: im ? `url(/img/${im}) center/cover no-repeat` : 'var(--linen)',
-                    display: 'grid', placeItems: im ? 'none' : 'center', fontSize: 11, color: 'var(--muted)',
-                    transition: 'transform .25s var(--ease)',
-                  }}>
-                  {!im && 'بدون تصویر'}
+          <Field label="تصویر پیتزا" full>
+            <div className="menu-image-manager">
+              {storedImages[form.id] && <img className="menu-image-preview" src={publicMenuImageUrl(storedImages[form.id].object_path)} alt={`تصویر ${form.name}`} />}
+              <div className="menu-image-actions">
+                <button type="button" className="btn sm primary" disabled={imageBusy || !editing || form.category !== 'پیتزا' || !isSupabaseConfigured}
+                  onClick={() => imageInputRef.current?.click()}>
+                  {imageBusy ? 'در حال ذخیره…' : storedImages[form.id] ? 'جایگزینی تصویر از رایانه' : 'بارگذاری تصویر از رایانه'}
                 </button>
-              ))}
+                {storedImages[form.id] && <button type="button" className="btn sm danger" disabled={imageBusy} onClick={() => void deleteUploadedImage()}>حذف تصویر بارگذاری‌شده</button>}
+                <input ref={imageInputRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(event) => void uploadImage(event.target.files?.[0])} />
+              </div>
+              <small className="menu-image-help">JPG، PNG یا WebP؛ تا ۱۸ مگابایت انتخاب می‌شود و سپس به WebP فشرده و در Supabase Storage ذخیره می‌شود. برای ماندگاری، ابتدا migration ۱۲ را روی دیتابیس خود اجرا کنید.</small>
+              {!isSupabaseConfigured && <small className="menu-image-error">برای ذخیرهٔ دائمی، اتصال امن Supabase باید تنظیم باشد.</small>}
+              {imagesError && <small className="menu-image-error">خواندن تصویرها ممکن نشد؛ migration ۱۲ و دسترسی Storage را بررسی کنید.</small>}
+              {imagesLoading && <small className="menu-image-help">در حال دریافت تصویرهای ذخیره‌شده…</small>}
+              <div className="menu-image-presets">
+                {IMAGES.map((im) => (
+                  <button key={im || 'none'} type="button" aria-label={im || 'بدون تصویر'}
+                    onClick={() => setForm({ ...form, image: im })}
+                    style={{
+                      width: 76, height: 52, borderRadius: 10, overflow: 'hidden', padding: 0,
+                      border: form.image === im ? '2px solid var(--moss)' : '1px solid var(--line)',
+                      background: im ? `url(/img/${im}) center/cover no-repeat` : 'var(--linen)',
+                      display: 'grid', placeItems: im ? 'none' : 'center', fontSize: 11, color: 'var(--muted)',
+                      transition: 'transform .25s var(--ease)',
+                    }}>
+                    {!im && 'بدون تصویر'}
+                  </button>
+                ))}
+              </div>
             </div>
           </Field>
           <Field label="یادداشت" full>

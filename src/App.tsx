@@ -12,7 +12,7 @@ import { faDigits } from './lib/format';
 import { jalaliLong, todayJalaliStr } from './lib/jalali';
 import {
   IconDashboard, IconLeaf, IconBook, IconLayers, IconTag, IconSliders,
-  IconPlus, IconBolt, IconCheck, IconAlert, IconMenu, IconX, IconSalad, IconWallet,
+  IconPlus, IconBolt, IconCheck, IconAlert, IconMenu, IconX, IconSalad, IconWallet, IconDownload,
 } from './components/Icons';
 import Dashboard from './views/Dashboard';
 import Ingredients from './views/Ingredients';
@@ -23,8 +23,10 @@ import Settings from './views/Settings';
 import Preparations from './views/Preparations';
 import Operations from './views/Operations';
 import SalesFinance from './views/SalesFinance';
+import Reports from './views/Reports';
+import Help from './views/Help';
 
-type ViewKey = 'dashboard' | 'ingredients' | 'recipes' | 'preparations' | 'operations' | 'pos' | 'overheads' | 'pricing' | 'settings';
+type ViewKey = 'dashboard' | 'ingredients' | 'recipes' | 'preparations' | 'operations' | 'pos' | 'overheads' | 'pricing' | 'reports' | 'help' | 'settings';
 
 const NAV: Array<{ key: ViewKey; label: string; short: string; sub: string; ico: any; group: string }> = [
   { key: 'dashboard', label: 'نمای کلی', short: 'خانه', sub: 'شاخص‌ها و تحلیل', ico: IconDashboard, group: 'نگاه کلان' },
@@ -35,10 +37,12 @@ const NAV: Array<{ key: ViewKey; label: string; short: string; sub: string; ico:
   { key: 'pos', label: 'فروش، فاکتور و صندوق', short: 'فروش', sub: 'فاکتور و گزارش', ico: IconWallet, group: 'عملیات' },
   { key: 'overheads', label: 'هزینه‌های سربار', short: 'سربار', sub: 'ضریب و تسهیم', ico: IconLayers, group: 'محاسبه' },
   { key: 'pricing', label: 'قیمت‌گذاری منو', short: 'قیمت', sub: 'حاشیهٔ سود', ico: IconTag, group: 'محاسبه' },
+  { key: 'reports', label: 'گزارش‌ها', short: 'گزارش', sub: 'اکسل و PDF', ico: IconDownload, group: 'گزارش‌ها' },
+  { key: 'help', label: 'راهنمای استفاده', short: 'راهنما', sub: 'راهنمای گام‌به‌گام', ico: IconBook, group: 'راهنما' },
   { key: 'settings', label: 'تنظیمات', short: 'تنظیمات', sub: 'پارامترها و داده', ico: IconSliders, group: 'سیستم' },
 ];
 
-const GROUPS = ['نگاه کلان', 'پایهٔ داده', 'عملیات', 'محاسبه', 'سیستم'];
+const GROUPS = ['نگاه کلان', 'پایهٔ داده', 'عملیات', 'محاسبه', 'گزارش‌ها', 'راهنما', 'سیستم'];
 
 const TITLES: Record<ViewKey, { t: string; s: string }> = {
   dashboard: { t: 'نمای کلی', s: 'شاخص‌های کلیدی بهای تمام‌شده و سلامتِ اقتصادی منو' },
@@ -49,6 +53,8 @@ const TITLES: Record<ViewKey, { t: string; s: string }> = {
   pos: { t: 'فروش، فاکتور و صندوق', s: 'ثبت کالاهای نهایی، فیش‌پرینت، دریافت و تطبیق پایان نوبت' },
   overheads: { t: 'هزینه‌های سربار', s: 'تعریف آیتم‌های سربار، ضریبِ اضافی و نحوهٔ تسهیم' },
   pricing: { t: 'قیمت‌گذاری منو', s: 'محاسبهٔ بهای تمام‌شده، قیمت پیشنهادی و حاشیهٔ سود' },
+  reports: { t: 'گزارش‌ها', s: 'گزارش فروش، گردش انبار، هزینه و سود و زیان با خروجی Excel و PDF' },
+  help: { t: 'راهنمای استفاده', s: 'راهنمای ساده و گام‌به‌گام انبار، فاکتور، صندوق و بهای تمام‌شده' },
   settings: { t: 'تنظیمات', s: 'پارامترهای محاسبه، پشتیبان و مدیریت داده‌ها' },
 };
 
@@ -287,6 +293,8 @@ function Shell() {
               {view === 'pos' && <SalesFinance key="v-pos" />}
               {view === 'overheads' && <Overheads key="v-ovh" />}
               {view === 'pricing' && <Pricing key="v-pri" />}
+              {view === 'reports' && <Reports key="v-reports" />}
+              {view === 'help' && <Help key="v-help" />}
               {view === 'settings' && <Settings key="v-set" />}
             </>
           )}
