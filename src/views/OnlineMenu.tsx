@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { PIZZAS } from '../data/pizzas';
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase';
 import { price } from '../lib/format';
+import { usePublicMenuImages } from '../lib/public-menu-images';
 import '../styles/online-menu.css';
 
 type PublicPrice = { code: string; price: number | string | null };
@@ -10,6 +11,7 @@ type MenuStatus = 'loading' | 'ready' | 'unavailable' | 'unconfigured';
 const PHONE_HREF = 'tel:02634422723';
 
 export default function OnlineMenu() {
+  const onlineImages = usePublicMenuImages();
   const [prices, setPrices] = useState<Record<string, number | null>>({});
   const [status, setStatus] = useState<MenuStatus>('loading');
   const [refresh, setRefresh] = useState(0);
@@ -85,7 +87,7 @@ export default function OnlineMenu() {
             return (
               <article className="online-pizza-card" key={pizza.id} style={{ ['--card-index' as string]: index }}>
                 <div className="online-pizza-photo">
-                  <img src={pizza.image} alt={`پیتزای ${pizza.fa}`} loading={index > 2 ? 'lazy' : 'eager'} />
+                  <img src={onlineImages[pizza.code] || pizza.image} alt={`پیتزای ${pizza.fa}`} loading={index > 2 ? 'lazy' : 'eager'} />
                   <span className="online-pizza-number">0{index + 1}</span>
                   <span className="online-pizza-meaning">{pizza.meaning}</span>
                 </div>

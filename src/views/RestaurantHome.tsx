@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import '../styles/restaurant.css';
 import { PIZZAS, type Pizza } from '../data/pizzas';
+import { usePublicMenuImages } from '../lib/public-menu-images';
 
 const STORY_COPY = 'در فریا، هر پیتزا با الهام از سبک ناپولیتن و برای لحظه‌هایی ساخته می‌شود که دوست داری کمی بیشتر دورِ میز بمانی. موادِ خوش‌طعم، خمیرِ سبک و گرمایِ تنور؛ همین سه‌تا، شروعِ قصه‌اند.';
 
@@ -75,6 +76,8 @@ function PizzaDetailModal({ pizza, onClose, callNumber, triggerRef }: { pizza: P
 }
 
 export default function RestaurantHome() {
+  const publicImages = usePublicMenuImages();
+  const sitePizzas = PIZZAS.map((pizza) => ({ ...pizza, image: publicImages[pizza.code] || pizza.image }));
   const [menuOpen, setMenuOpen] = useState(false);
   const [scroll, setScroll] = useState(0);
   const [activePizza, setActivePizza] = useState<string | null>(null);
@@ -165,7 +168,7 @@ export default function RestaurantHome() {
 
   const closeMenu = () => setMenuOpen(false);
   const closePizzaModal = useCallback(() => setActivePizza(null), []);
-  const activePizzaData = PIZZAS.find((pizza) => pizza.id === activePizza) ?? null;
+  const activePizzaData = sitePizzas.find((pizza) => pizza.id === activePizza) ?? null;
   const callNumber = 'tel:02634422723';
   const mapUrl = 'https://maps.app.goo.gl/FXQoJG5YNpM3Axk46';
 
@@ -259,7 +262,7 @@ export default function RestaurantHome() {
           <p className="menu-intro-copy" data-reveal>هرکدام نامی دارند و حال‌وهوایی. روی پیتزا بزن تا ترکیبش را بشناسی؛ برای قیمتِ روز و سفارش، با ما تماس بگیر.</p>
         </div>
         <div className="pizza-grid section-shell">
-          {PIZZAS.map((pizza, index) => (
+          {sitePizzas.map((pizza, index) => (
             <article className="pizza-card" key={pizza.id}>
               <button className="pizza-card-button" type="button" aria-label={`نمایش تصویر و ترکیبات پیتزای ${pizza.fa}`} aria-haspopup="dialog" onClick={(event) => { pizzaTriggerRef.current = event.currentTarget; setActivePizza(pizza.id); }}>
                 <span className="pizza-image-wrap"><img src={pizza.image} alt={`پیتزای ناپولیتن ${pizza.fa} با ${pizza.accent}`} loading="lazy" />
